@@ -1,4 +1,4 @@
-ASM = nasm
+ASM ?= nasm
 CC = gcc
 SRC_DIR = src
 TOOLS_DIR = tools
