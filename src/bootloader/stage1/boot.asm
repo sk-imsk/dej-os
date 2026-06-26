@@ -369,8 +369,8 @@ disk_reset:
 
 msg_loading: db 'Loading', ENDL, 0
 msg_read_failed: db 'Cant read from the disk', ENDL, 0
-msg_kernel_not_found: db 'No kernel bro cant start', ENDL, 0
-file_kernel_bin: db 'KERNEL  BIN'
+msg_kernel_not_found: db 'Stage 2 bootloader not found', ENDL, 0
+file_kernel_bin: db 'STAGE2  BIN'
 kernel_cluster: dw 0
 
 
