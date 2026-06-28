@@ -1,5 +1,8 @@
 ASM = nasm
 CC = gcc
+CC16 = wcc
+LD16 = wlink
+
 SRC_DIR = src
 TOOLS_DIR = tools
 BUILD_DIR = build
@@ -67,6 +70,8 @@ always:
 
 
 clean:
+	$(MAKE) -C $(SRC_DIR)/bootloader/stage1 BUILD_DIR=$(abspath $(BUILD_DIR)) clean
+	$(MAKE) -C $(SRC_DIR)/bootloader/stage2 BUILD_DIR=$(abspath $(BUILD_DIR)) clean
+	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR)) clean
 	rm -rf $(BUILD_DIR)/*
-	clear
-	@echo hi
+	@echo all good bro

@@ -1,65 +1,24 @@
-org 0x0000
 bits 16
 
-%define ENDL 0x0D, 0x0A
+section _ENTRY class=CODE
 
-start:
-	jmp main
-
-
-puts:
-	; save regsiters lol
-	push ax
-	push si
+extern _cstart
+global entry
 
 
-.loop:
-	lodsb ; loads character in al
-	or al, al; verify there is a next character
-	jz .done
+entry:
+    cli
+    mov ax, ds
+    mov ss, ax
+    mov sp, 0
+    mov bp, sp
+    sti
 
-	mov ah, 0x0e     ; call big boi interupt
-	int 0x10
+    ; expect boot drive in dl send it as a arg to main
 
+    xor dh, dh
+    push dx
+    call _cstart
 
-	jmp .loop ; keep going beacuse there is another character to print (get back to work)
-
-
-.done:
-	pop si
- 	pop ax
-	ret
-
-
-
-
-;
-;
-; Prints a string to the screen
-;
-; - ds:si points to string
-;
-
-
-
-main:
-
-	; setup
-	mov ax, 0x2000
-	mov ds, ax
-	mov es, ax
-
-	; setup stack
-	mov ss, ax
-	mov sp, 0x7C00
-
-	mov si, msg_hello
-	call puts
-
-	hlt
-
-
-.hlt:
-	jmp .hlt
-
-msg_hello: db 'Hello world!', ENDL, 0
+    cli
+    hlt
