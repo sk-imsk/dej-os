@@ -2,28 +2,71 @@ bits 16
 
 section _TEXT class=CODE
 
-global _x86_Video_WriteCharTeletype
-_x86_Video_WriteCharTeletype:
-    push bp         ; save old call
-    mov bp, sp      ; init new call
+;
+; void _cdecl x86_div64_32(uint64_t dividend, uint32_t divisor, uint64_t* quotientOut, uint32_t* remainderOut);
+;
+; idk this is kinda weird might make it better later
+global _x86_div64_32
+_x86_div64_32:
 
-    ; save bx
+    ; make new call frame
+    push bp             ; save old call frame
+    mov bp, sp          ; init new call frame
+
     push bx
 
-    ; bp is old call frame
-    ; [bp + 2] return address
-    ; [bp + 4] first arg   (character)     ; bytes are convert to word beacuse fuck you
-    ; [bp + 6] second arg (page)
-    ; all bytes are converted to word
-    mov ah, 0Eh
-    mov al, [bp + 4]; first argument
-    mov bh, [bp + 6] ; omg second argument
+    ; divide upper 32 bits
+    mov eax, [bp + 8]   ; eax <- upper 32 bits of dividend
+    mov ecx, [bp + 12]  ; ecx <- divisor
+    xor edx, edx
+    div ecx             ; eax - quot, edx - remainder
 
-    int 10h
-    ;revive bx
+    ; store upper 32 bits of quotient
+    mov bx, [bp + 16]
+    mov [bx + 4], eax
+
+    ; divide lower 32 bits
+    mov eax, [bp + 4]   ; eax <- lower 32 bits of dividend
+                        ; edx <- old remainder
+    div ecx
+
+    ; store results
+    mov [bx], eax
+    mov bx, [bp + 18]
+    mov [bx], edx
+
     pop bx
 
-    ;restore old call frame
+    ; restore old call frame
+    mov sp, bp
+    pop bp
+    ret
+
+
+global _x86_Video_WriteCharTeletype
+_x86_Video_WriteCharTeletype:
+
+    ; make new call frame
+    push bp             ; save old call frame
+    mov bp, sp          ; make new call frame
+
+    push bx
+
+    ; [bp + 0] - old call frame
+    ; [bp + 2] - return address (small memory model => 2 bytes)
+    ; [bp + 4] - first argument (character)
+    ; [bp + 6] - second argument (page)
+    ; note: bytes are converted to words because fuck you
+    mov ah, 0Eh
+    mov al, [bp + 4]
+    mov bh, [bp + 6]
+
+    int 10h
+
+    ; revive bx
+    pop bx
+
+    ; restore old call frame
     mov sp, bp
     pop bp
     ret

@@ -1,8 +1,15 @@
 // main c
 #include "stdint.h"
 #include "stdio.h"
+#include "x86.h"
 
 void _cdecl cstart(uint16_t bootDrive){
-    puts("hello world c");
-    for(;;);
+    const char far* far_str = "far string";
+
+    uint64_t q = 0;
+    uint32_t r = 0;
+    puts("hello world c\n");
+    printf("Formatted %% %c %s %ls\r\n", 'a', "string", far_str);
+    printf("Formatted %d %i %x %p %o %hd %hi %hhu %hhd\r\n", 1234, -5678, 0xdead, 0xbeef, 012345, (short)27, (short)-42, (unsigned char)20, (signed char)-10);
+    printf("Formatted %ld %lx %lld %llx\r\n", -100000000l, 0xdeadbeeful, 10200300400ll, 0xdeadbeeffeebdaedull);
 }
