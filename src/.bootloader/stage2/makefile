@@ -3,8 +3,8 @@ SRC_DIR ?= src
 ASM ?= nasm
 
 
-$(BUILD_DIR)/stage2.bin: main.asm
-	$(ASM)  $< -f bin  -o $@
+$(BUILD_DIR)/stage2.bin: main.asm recovery.asm
+	$(ASM) main.asm -f bin  -o $@
 
 
 

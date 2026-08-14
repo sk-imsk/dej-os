@@ -124,7 +124,7 @@ main:
 	mov [bdb_heads], dh         ; head count
 
 	; find lba = reserved + fats * sectors per fat
-	mov ax, [bdb_sectors_per_fat],
+	mov ax, [bdb_sectors_per_fat]
 	mov bl, [bdb_fat_count]
 	xor bh, bh
 	mul bx                                          ; ax = (fats * sectors per fat)
