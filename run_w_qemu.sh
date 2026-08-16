@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-qemu-system-x86_64 -drive format=raw,file=build/dej-os.img
+qemu-system-x86_64 -drive format=raw,file=build/dej-os.img -no-reboot

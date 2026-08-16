@@ -3,7 +3,8 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -mno-red-zone -m64
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -mno-red-zone -m64 -mcmodel=kernel
+# bro too many args bro
 LD := ld.lld
 
 LIMINE_DIR := limine
@@ -13,25 +14,30 @@ KERNEL := $(BUILD_DIR)/kernel.elf
 IMAGE := $(BUILD_DIR)/dej-os.img
 MNT := $(BUILD_DIR)/mnt
 
+C_SOURCES := $(shell find $(KERNEL_DIR) -name '*.c')
+C_OBJECTS := $(patsubst $(KERNEL_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
+
+ASM_SOURCES := $(shell find $(KERNEL_DIR) -name '*.asm')
+ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 .PHONY: all kernel image run clean
 
-all: image
+all: always image
 
 kernel: $(KERNEL)
 
-$(KERNEL): $(BUILD_DIR)/entry.o $(BUILD_DIR)/main.o $(KERNEL_DIR)/main.c $(KERNEL_DIR)/linker.ld
-	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(BUILD_DIR)/entry.o $(BUILD_DIR)/main.o
 
-$(BUILD_DIR)/entry.o:  $(KERNEL_DIR)/entry.asm
-	mkdir -p $(BUILD_DIR)
-	$(ASM) -f elf64 $< -o $@
+$(KERNEL): $(C_OBJECTS) $(ASM_OBJECTS) $(KERNEL_DIR)/main.c $(KERNEL_DIR)/linker.ld
+	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS)
 
-$(BUILD_DIR)/main.o: $(KERNEL_DIR)/main.c
+$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
 	$(CC) $(CCFLAGS) -c $< -o $@
+$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.asm
+	$(ASM) -f elf64 $< -o $@
 
 image: $(IMAGE)
 
 $(IMAGE): $(KERNEL) limine.conf
+
 	rm -f $@
 
 	dd if=/dev/zero of=$@ bs=1M count=64
@@ -60,6 +66,9 @@ $(IMAGE): $(KERNEL) limine.conf
 	$(LIMINE) bios-install $@
 run: image
 	qemu-system-x86_64 -drive format=raw,file=$(IMAGE)
+
+always:
+	mkdir -p bulid/
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true
