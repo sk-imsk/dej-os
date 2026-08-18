@@ -1,3 +1,4 @@
 build/
 *.err
 limine/
+.clangd
