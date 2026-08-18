@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -mno-red-zone -m64 -mcmodel=kernel
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -mno-red-zone -m64 -mcmodel=kernel -std=c11 -Wall -Werror
 # bro too many args bro
 LD := ld.lld
 
@@ -69,6 +69,7 @@ run: image
 
 always:
 	mkdir -p bulid/
+	mkdir -p build/keyboard
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

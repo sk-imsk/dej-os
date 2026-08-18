@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 void clrscr();
+void serial_puts(const char * s);
 void putc(char c);
 void puts(const char* str);
 void printf(const char* fmt, ...);
