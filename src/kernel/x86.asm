@@ -13,3 +13,9 @@ x86_inb:
     xor eax, eax
     in al, dx
     ret
+
+
+global x86_load_idt
+x86_load_idt:
+    lidt [rdi]
+    ret

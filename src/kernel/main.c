@@ -6,7 +6,8 @@
 #include "keyboard/keyboard.h"
 #include <stdint.h>
 #include "stdio.h"
-
+#include "interrupt/interrupt.h"
+#include "memory/memory.h"
 
 // limine stuff (6 is latest revision)
 __attribute__((used, section(".limine_requests")))
@@ -15,6 +16,17 @@ static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
 __attribute__((used, section(".limine_requests")))
 static volatile struct limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST_ID,
+    .revision = 0
+};
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST_ID,
     .revision = 0
 };
 
@@ -46,7 +58,7 @@ void kentry(void) {
 
     int8_t result;
     serial_init();
-    x86_outb(0x3F8, 'k');
+    idt_init();
     result = keyboard_init();
 
     switch (result){
@@ -59,15 +71,12 @@ void kentry(void) {
             x86_outb(0x3F8, 't'); // t for test failed
     }
 
+
     // serial "kentry" for debugging or some
 
-    x86_outb(0x3F8, 'e');
-    x86_outb(0x3F8, 'n');
-    x86_outb(0x3F8, 't');
-    x86_outb(0x3F8, 'r');
-    x86_outb(0x3F8, 'y');
+    serial_puts("kentry\n");
 
-    // Ensure the bootloader actually understands our base revision.
+    // Ensure the bootloader actually gets us
     if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false) {
         hcf();
     }
@@ -75,6 +84,19 @@ void kentry(void) {
     // Ensure we got a framebuffer.
     if (framebuffer_request.response == NULL
      || framebuffer_request.response->framebuffer_count < 1) {
+         serial_puts("Didnt recieve a framebuffer");
+         hcf();
+    }
+
+    // make sure we got a memmap
+    if (memmap_request.response == NULL || memmap_request.response->entry_count < 1) {
+        serial_puts("Didnt recieve a memmap");
+        hcf();
+    }
+
+    // make sure we got hhdm or something
+    if (hhdm_request.response == NULL){
+        serial_puts("Didnt recieve a hhdm");
         hcf();
     }
 
@@ -84,7 +106,7 @@ void kentry(void) {
     // Print a nice pattern to screen as an example.
     // Note: we assume the framebuffer model is RGB with 32-bit pixels.
 
-
+    memory_init(memmap_request.response, hhdm_request.response);
 
     volatile uint32_t *fb_ptr = framebuffer->address;
     for (size_t y = 0; y < framebuffer->height; y++) {

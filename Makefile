@@ -68,8 +68,9 @@ run: image
 	qemu-system-x86_64 -drive format=raw,file=$(IMAGE)
 
 always:
-	mkdir -p bulid/
+	mkdir -p build/
 	mkdir -p build/keyboard
+	mkdir -p build/interrupt
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true
