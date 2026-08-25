@@ -1,6 +1,6 @@
-#include "memory.h"
+#include "string.h"
 
-void* memcpy(void* dst, const void* src, uint16_t num)
+void* memcpy(void* dst, const void* src, size_t num)
 {
     uint8_t* u8Dst = (uint8_t *)dst;
     const uint8_t* u8Src = (const uint8_t *)src;
@@ -11,7 +11,7 @@ void* memcpy(void* dst, const void* src, uint16_t num)
     return dst;
 }
 
-void * memset(void * ptr, int value, uint16_t num)
+void * memset(void * ptr, int value, size_t num)
 {
     uint8_t* u8Ptr = (uint8_t *)ptr;
 
@@ -21,7 +21,7 @@ void * memset(void * ptr, int value, uint16_t num)
     return ptr;
 }
 
-int memcmp(const void* ptr1, const void* ptr2, uint16_t num)
+int memcmp(const void* ptr1, const void* ptr2, size_t num)
 {
     const uint8_t* u8Ptr1 = (const uint8_t *)ptr1;
     const uint8_t* u8Ptr2 = (const uint8_t *)ptr2;

@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -mno-red-zone -m64 -mcmodel=kernel -std=c11 -Wall -Werror
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -mno-red-zone -m64 -mcmodel=kernel -std=c11 -Wall -Werror -g
 # bro too many args bro
 LD := ld.lld
 
@@ -71,6 +71,7 @@ always:
 	mkdir -p build/
 	mkdir -p build/keyboard
 	mkdir -p build/interrupt
+	mkdir -p build/memory
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

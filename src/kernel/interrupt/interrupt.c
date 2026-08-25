@@ -1,6 +1,3 @@
-
-
-
 #include <stdint.h>
 #include "../x86.h"
 #include "../stdio.h"
@@ -49,6 +46,16 @@ void err_divide_by_0(void){
     serial_puts("Division by 0 occured");
     for (;;) __asm__ volatile ("cli; hlt");
 }
+extern void int_general_protection_fault(void);
+void err_general_protection_fault(void){
+    serial_puts("gp fault yo lowk im hungry");
+    for (;;) __asm__ volatile ("cli; hlt");
+}
+extern void int_page_fault(void);
+void err_page_fault(void){
+    serial_puts("page fault");
+    for (;;) __asm__ volatile ("cli; hlt");
+}
 
 
 
@@ -58,6 +65,8 @@ void idt_init(void){
 
 
     idt_set_gate(0, int_divide_by_0);
+    idt_set_gate(13, int_general_protection_fault);
+    idt_set_gate(14, int_page_fault);
 
 
     struct IDTR idtr = {

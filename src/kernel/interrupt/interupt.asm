@@ -45,3 +45,23 @@ int_divide_by_0:
 
     POP_ALL
     iretq
+extern err_general_protection_fault
+global int_general_protection_fault
+int_general_protection_fault:
+    PUSH_ALL
+
+    sub rsp, 8
+    call err_general_protection_fault
+    add rsp, 8
+
+    POP_ALL
+    iretq
+extern err_page_fault
+global int_page_fault
+int_page_fault:
+    PUSH_ALL
+
+    call err_page_fault
+
+    POP_ALL
+    iretq
