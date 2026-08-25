@@ -85,11 +85,10 @@ void kentry(void) {
     serial_puts("kentry\n");
 
     switch (result){
-        static bool keyboard = false;
         case -1:
             serial_puts("yo the keyboard aint work ");
         case 0:
-            keyboard = true;
+            break;
         case 1:
             x86_outb(0x3F8, 't'); // t for test failed
     }
