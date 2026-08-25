@@ -72,6 +72,7 @@ always:
 	mkdir -p build/keyboard
 	mkdir -p build/interrupt
 	mkdir -p build/memory
+	mkdir -p build/x86/
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

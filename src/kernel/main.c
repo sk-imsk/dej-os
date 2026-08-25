@@ -125,6 +125,7 @@ void kentry(void) {
 
     void * data = givemeapage();
     memset(data, 0, 1024*4);
+    retpage(data);
 
     // We're done, just hang...
     hcf();

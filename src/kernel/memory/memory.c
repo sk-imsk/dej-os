@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../stddef.h"
+#include "../panic.h"
 
 #define KiB(x) x * 1024
 #define KB(x) x * 1000
@@ -81,4 +82,25 @@ void * givemeapage(){
     page_list[i].used = true;
 
     return (void *)(page_list[i].start + hhdm->offset);
+}
+
+
+// must be from givemepage or else ill take down the system
+void retpage(void * ptr){
+   uint32_t i;
+   ptr = ptr - hhdm->offset;
+   for (i = 0; i < pages; i++){
+       if (page_list[i].start == (uint64_t)ptr){
+            if (page_list[i].used == true){
+                page_list[i].used = false;
+                return;
+            }
+            else {
+                panic("Attemped deallocation of unused page");
+            }
+       }
+
+
+   }
+   panic("Attempted deallocation of nonexistent page");
 }
