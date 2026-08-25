@@ -2,8 +2,6 @@
 #include "x86.h"
 #include "lim/limine.h"
 #include "stddef.h"
-#include "stdbool.h"
-#include "keyboard/keyboard.h"
 #include "stdio.h"
 #include "interrupt/interrupt.h"
 #include "memory/memory.h"
@@ -76,22 +74,11 @@ void kentry(void) {
     }
 
 
-    int8_t result;
     serial_init();
     idt_init();
     memory_init(memmap_request.response, hhdm_request.response);
-    result = keyboard_init();
 
     serial_puts("kentry\n");
-
-    switch (result){
-        case -1:
-            serial_puts("yo the keyboard aint work ");
-        case 0:
-            break;
-        case 1:
-            x86_outb(0x3F8, 't'); // t for test failed
-    }
 
 
 
