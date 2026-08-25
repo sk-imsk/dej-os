@@ -9,6 +9,7 @@
 #include "memory/memory.h"
 #include "string.h"
 #include <stdint.h>
+#include "panic.h"
 
 // limine stuff (6 is latest revision)
 __attribute__((used, section(".limine_requests")))
@@ -37,11 +38,7 @@ static volatile uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_
 __attribute__((used, section(".limine_requests_end")))
 static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
-void hcf(void){
-    for (;;)
-        __asm__ volatile ("hlt");
 
-}
 
 void serial_init(void)
 {
@@ -59,26 +56,23 @@ void kentry(void) {
 
     // Ensure the bootloader actually gets us
     if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false) {
-        hcf();
+        panic("Bootloader doesnt support our revision");
     }
 
     // Ensure we got a framebuffer.
     if (framebuffer_request.response == NULL
      || framebuffer_request.response->framebuffer_count < 1) {
-         serial_puts("Didnt recieve a framebuffer\n");
-         hcf();
+         panic("Didnt recieve a framebuffer");
     }
 
     // make sure we got a memmap
     if (memmap_request.response == NULL || memmap_request.response->entry_count < 1) {
-        serial_puts("Didnt recieve a memmap\n");
-        hcf();
+        panic("Didnt recieve a memmap");
     }
 
     // make sure we got hhdm or something
     if (hhdm_request.response == NULL){
-        serial_puts("Didnt recieve a hhdm\n");
-        hcf();
+        panic("Didnt recieve a hhdm");
     }
 
 
@@ -91,11 +85,11 @@ void kentry(void) {
     serial_puts("kentry\n");
 
     switch (result){
+        static bool keyboard = false;
         case -1:
-            x86_outb(0x3F8, 'x');   // x for very strange error
-            hcf();
+            serial_puts("yo the keyboard aint work ");
         case 0:
-            break;
+            keyboard = true;
         case 1:
             x86_outb(0x3F8, 't'); // t for test failed
     }
@@ -128,5 +122,5 @@ void kentry(void) {
     retpage(data);
 
     // We're done, just hang...
-    hcf();
+    for (;;) __asm__ volatile ("cli; hlt");
 }

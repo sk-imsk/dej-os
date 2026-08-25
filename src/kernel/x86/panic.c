@@ -2,6 +2,7 @@
 
 
 _Noreturn void panic(const char * s){
+
     serial_puts("Panic: ");
     serial_puts(s);
 
