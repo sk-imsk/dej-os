@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include "panic.h"
 
+__attribute__((section(".temprature")))
+_Atomic uint8_t temprature;
+
+
 // limine stuff (6 is latest revision)
 __attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
@@ -30,6 +34,8 @@ static volatile struct limine_hhdm_request hhdm_request = {
     .revision = 0
 };
 
+
+
 __attribute__((used, section(".limine_requests_start")))
 static volatile uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
 
@@ -37,6 +43,7 @@ __attribute__((used, section(".limine_requests_end")))
 static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
 
+int16_t random;
 
 void serial_init(void)
 {
