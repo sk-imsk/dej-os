@@ -2,7 +2,7 @@
 #include "../stdio.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "../stddef.h"
+#include <stddef.h>
 #include "../panic.h"
 
 #define KiB(x) x * 1024

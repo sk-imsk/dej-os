@@ -4,13 +4,12 @@
 #include <stdarg.h>
 
 
-
 void serial_puts(const char * s){
     while (*s){
         if (*s == '\n'){
             x86_outb(0x3f8, '\r');
             x86_outb(0x3f8, '\n');
-            (void)*s++;
+
         }
 
         x86_outb(0x3F8, *s++);
