@@ -50,6 +50,7 @@ static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARK
 
 
 static _Atomic bool kentry_ran = false;
+_Atomic bool cpu_running;
 
 void serial_init(void)
 {
@@ -65,8 +66,9 @@ void serial_init(void)
 
 void kentry(void) {
     if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");
+    atomic_store(&cpu_running, true);
+    atomic_exchange(&kentry_ran, true);
 
-    kentry_ran = true;
     // Ensure the bootloader actually gets us
     if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false) {
         panic("Bootloader doesnt support our revision");
@@ -99,36 +101,11 @@ void kentry(void) {
 
     serial_puts("kentry\n");
 
-    // Fetch the first framebuffer.
-    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-
-    // Print a nice pattern to screen as an example.
-    // Note: we assume the framebuffer model is RGB with 32-bit pixels.
-
-
-    volatile uint32_t *fb_ptr = framebuffer->address;
-    for (size_t y = 0; y < framebuffer->height; y++) {
-        for (size_t x = 0; x < framebuffer->width; x++) {
-            uint32_t nY = y * 255 / framebuffer->height;
-
-            uint32_t red = 255;
-            uint32_t blue = nY;
-            uint32_t green = 105;
-
-            fb_ptr[y * (framebuffer->pitch / 4) + x] = (red << 16) | (green << 8) | blue;
-        }
-    }
-
-
 
 
     struct limine_mp_response * mp = mp_request.response;
 
 
-    char buffer[19];
-    uint64_to_hex(mp->cpu_count, buffer);
-    serial_puts(buffer);
-    serial_puts("\n");
 
     for (uint64_t i = 0; i < mp->cpu_count; i++) {
         struct limine_mp_info *cpu = mp->cpus[i];
@@ -145,36 +122,22 @@ void kentry(void) {
 
 
 
+    // Fetch the first framebuffer.
+    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+    volatile uint32_t *fb_ptr = framebuffer->address;
+
     for (size_t y = 0; y < framebuffer->height; y++) {
         for (size_t x = 0; x < framebuffer->width; x++) {
             uint32_t nY = y * 255 / framebuffer->height;
             uint32_t nX = x * 255 / framebuffer->width;
-            uint32_t red = 255;
+            uint32_t red = nX;
             uint32_t blue = nY;
-            uint32_t green = nX;
+            uint32_t green = 211;
 
             fb_ptr[y * (framebuffer->pitch / 4) + x] = (red << 16) | (green << 8) | blue;
         }
     }
 
-
-
-
-    void * data = givemeapage();
-    if (data == NULL){
-        panic("Memory full");
-    }
-
-    memset(data, 0, 4*1024);
-
-    _Atomic uint64_t * p = data;
-    char * str = (char *)data + 8;
-
-    atomic_store(p, temperature);
-
-    char * print = uint64_to_hex(*p, str);
-
-    serial_puts(print);
 
 
 

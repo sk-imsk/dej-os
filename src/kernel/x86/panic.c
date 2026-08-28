@@ -1,7 +1,11 @@
 #include "../stdio.h"
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
+
+extern _Atomic bool cpu_running;
 struct stack_frame{
     struct stack_frame * next;
     void * ret;
@@ -51,6 +55,14 @@ _Noreturn static void triple_fault(void) {
 
 _Noreturn void panic(const char * s){
     __asm__ volatile ("cli");
+    if (atomic_exchange(&cpu_running, false)) {
+        while (true){
+            __asm__ volatile ("hlt");
+        }
+    }
+    atomic_store(&cpu_running, false);          // let everyone know cpus shouldent be running (they will turn off eventually)
+
+
     serial_puts("\nPanic: ");
     serial_puts(s);
     serial_puts("\n");
