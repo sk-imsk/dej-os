@@ -672,3 +672,7 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+Notwithstanding any provisions in the preceding GPL text, the permissions granted by this License are strictly conditional upon the user maintaining a non-serious, non-commercial, or satirical intent. 
+If you attempt to use DEJ OS for corporate engineering, enterprise deployment, government operations, system administration certification, or any form of pedantic, overly serious software development, your license under this agreement is immediately and retroactively terminated.
+Any software built on top of, or derived from, DEJ OS must inherit this anti-seriousness clause.
