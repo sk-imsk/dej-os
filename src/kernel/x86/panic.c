@@ -55,6 +55,8 @@ _Noreturn static void triple_fault(void) {
 
 _Noreturn void panic(const char * s){
     __asm__ volatile ("cli");
+
+
     if (atomic_exchange(&cpu_running, false)) {
         while (true){
             __asm__ volatile ("hlt");
