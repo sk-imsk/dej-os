@@ -142,16 +142,24 @@ void kentry(void) {
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
     volatile uint32_t *fb_ptr = framebuffer->address;
 
-    for (size_t y = 0; y < framebuffer->height; y++) {
-        for (size_t x = 0; x < framebuffer->width; x++) {
-            uint32_t nY = y * 255 / framebuffer->height;
-            uint32_t nX = x * 255 / framebuffer->width;
-            uint32_t red = nX;
-            uint32_t blue = 233;
-            uint32_t green = nY;
 
-            fb_ptr[y * (framebuffer->pitch / 4) + x] = (red << 16) | (green << 8) | blue;
+
+    size_t frame = 0;
+
+    while (1) {
+        for (size_t y = 0; y < framebuffer->height; y++) {
+            for (size_t x = 0; x < framebuffer->width; x++) {
+
+                uint32_t red = 256;
+                uint32_t green = (y + frame) % 256;
+                uint32_t blue =   (x + frame) % 256;
+
+                fb_ptr[y * (framebuffer->pitch / 4) + x] =
+                    (red << 16) | (green << 8) | blue;
+            }
         }
+        for (int i = 0; i > 100; i++) __asm__ volatile ("pause");
+        frame++;
     }
 
 
