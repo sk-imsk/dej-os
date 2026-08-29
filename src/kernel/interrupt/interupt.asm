@@ -36,32 +36,52 @@
     pop rax
 %endmacro
 
-extern err_divide_by_0
+extern divide_by_0_handler
 global int_divide_by_0
 int_divide_by_0:
     PUSH_ALL
 
-    call err_divide_by_0
+
+    call divide_by_0_handler
+
 
     POP_ALL
     iretq
-extern err_general_protection_fault
+
+extern nmi_handler
+global int_nmi
+int_nmi:
+    PUSH_ALL
+
+    mov rdi, rsp
+
+    call nmi_handler
+
+
+    POP_ALL
+    iretq
+
+extern general_protection_fault_handler
 global int_general_protection_fault
 int_general_protection_fault:
     PUSH_ALL
 
-    sub rsp, 8
-    call err_general_protection_fault
-    add rsp, 8
+    call general_protection_fault_handler
+
 
     POP_ALL
     iretq
-extern err_page_fault
+
+
+
+extern page_fault_handler
 global int_page_fault
 int_page_fault:
     PUSH_ALL
 
-    call err_page_fault
+
+    call page_fault_handler
+
 
     POP_ALL
     iretq

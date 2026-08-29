@@ -95,9 +95,25 @@ void kentry(void) {
     }
 
 
+
     serial_init();
     idt_init();
     memory_init(memmap_request.response, hhdm_request.response);
+
+
+    if (x86_inb(0x92) == 4) {
+        serial_puts("Last system failure caused by watchdog");
+        __asm__ volatile (
+            "in $0x92, %%al\n\t"
+            "and $0xfb, %%al\n\t"
+            "out %%al, $0x92"
+            :
+            :
+            : "al"
+        );
+
+
+    }
 
     serial_puts("kentry\n");
 
@@ -131,12 +147,14 @@ void kentry(void) {
             uint32_t nY = y * 255 / framebuffer->height;
             uint32_t nX = x * 255 / framebuffer->width;
             uint32_t red = nX;
-            uint32_t blue = nY;
-            uint32_t green = 211;
+            uint32_t blue = 233;
+            uint32_t green = nY;
 
             fb_ptr[y * (framebuffer->pitch / 4) + x] = (red << 16) | (green << 8) | blue;
         }
     }
+
+
 
 
 

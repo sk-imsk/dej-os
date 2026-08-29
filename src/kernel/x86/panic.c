@@ -74,3 +74,9 @@ _Noreturn void panic(const char * s){
 
     triple_fault(); // turn off computer
 }
+
+
+_Noreturn void fi_panic(const char * cooked){ // like panic but were basically cooked instantly so dont bother with anything fancy
+    serial_puts(cooked); // we cooked gng
+    triple_fault();
+}

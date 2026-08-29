@@ -1,7 +1,8 @@
+#pragma once
 #include <stdint.h>
 
-#ifndef MSR_H
-#define MSR_H
+
+
 static inline uint64_t rdmsr(uint32_t msr)
 {
     uint32_t lo, hi;
@@ -14,4 +15,12 @@ static inline uint64_t rdmsr(uint32_t msr)
 
     return ((uint64_t)hi << 32) | lo;
 }
-#endif
+
+static inline void wrmsr(uint32_t msr_id, uint64_t msr_val) {
+    uint32_t edx = msr_val >> 32;
+    uint32_t eax = msr_val & 0xFFFFFFFF;
+    __asm__ __volatile__ (
+        "wrmsr"
+        : : "c" (msr_id), "d" (edx), "a" (eax)
+    );
+}
