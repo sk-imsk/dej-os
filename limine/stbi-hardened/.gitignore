@@ -1,0 +1,13 @@
+# build artifacts from tests/Makefile and tests/torture.sh
+tests/build/
+tests/crash-*
+tests/corpus/
+
+# clang --analyze scratch output
+*.plist
+
+# editor / OS noise
+*.swp
+*.swo
+*~
+.DS_Store
