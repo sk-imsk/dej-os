@@ -10,6 +10,7 @@
 #include "msr.h"
 #include "cpu/cpu1/temprature.h"
 #include <stdatomic.h>
+#include <stdio.h>
 
 __attribute__((section(".temperature")))
 _Atomic uint64_t temperature;
@@ -144,6 +145,8 @@ void kentry(void) {
 
 
 
+
+    printf("hello %i %s %i", 1, "hi", 39);
     size_t frame = 0;
 
     while (1) {
