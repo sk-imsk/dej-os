@@ -14,6 +14,11 @@ x86_inb:
     in al, dx
     ret
 
+global x86_inw
+x86_inw:
+    mov dx, di
+    in ax, dx
+    ret
 
 global x86_load_idt
 x86_load_idt:

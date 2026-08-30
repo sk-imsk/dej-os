@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=c11 -Wall -Werror -g -mrdrnd
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=c11 -g -mrdrnd -Wall -Werror
 # bro too many args bro
 LD := ld.lld
 
@@ -74,6 +74,7 @@ always:
 	mkdir -p build/memory
 	mkdir -p build/x86/
 	mkdir -p build/cpu/cpu1/
+	mkdir -p build/disk
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

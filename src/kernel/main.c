@@ -10,6 +10,7 @@
 #include "msr.h"
 #include "cpu/cpu1/temprature.h"
 #include <stdatomic.h>
+#include "disk/disk.h"
 
 __attribute__((section(".temperature")))
 _Atomic uint64_t temperature;
@@ -136,7 +137,7 @@ void kentry(void) {
         }
     }
 
-
+    disk_init();
 
     // Fetch the first framebuffer.
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
