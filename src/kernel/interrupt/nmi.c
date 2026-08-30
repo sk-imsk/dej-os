@@ -4,6 +4,7 @@
 #include "../panic.h"
 #include <stdatomic.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct {
     // General-purpose registers (pushed manually by assembly)
@@ -65,17 +66,14 @@ extern _Atomic uint64_t temperature;
 extern void int_nmi(void);
 void nmi_handler(nmi_registers_t * regs){
     char msg[19];
+    char msg2[19];
 
     uint64_t crash_addr = regs->rip;
     uint64_t crash_rax = regs->rax;
-
-    serial_puts("NMI: address =");
     uint64_to_hex(crash_addr, msg);
-    serial_puts(msg);
-    serial_puts("RAX = ");
-    uint64_to_hex(crash_rax, msg);
-    serial_puts(msg);
-    serial_puts("\n\n\n\n\n");
+    uint64_to_hex(crash_rax, msg2);
+
+    printf("NMI address = %p RAX = %p \n\n",msg , msg2);
 
     uint64_t res = check_severity();
     if (res == 0) return; // we good yo
