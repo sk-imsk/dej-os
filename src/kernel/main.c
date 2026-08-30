@@ -10,7 +10,6 @@
 #include "msr.h"
 #include "cpu/cpu1/temprature.h"
 #include <stdatomic.h>
-#include <stdio.h>
 
 __attribute__((section(".temperature")))
 _Atomic uint64_t temperature;
