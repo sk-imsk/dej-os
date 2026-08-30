@@ -148,7 +148,7 @@ void kentry(void) {
             uint32_t nY = y * 255 / framebuffer->height;
             uint32_t nX = x * 255 / framebuffer->width;
             uint32_t red = nX;
-            uint32_t blue = 233;
+            uint32_t blue = 255;
             uint32_t green = nY;
 
             fb_ptr[y * (framebuffer->pitch / 4) + x] = (red << 16) | (green << 8) | blue;

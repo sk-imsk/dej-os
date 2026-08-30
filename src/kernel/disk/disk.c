@@ -16,15 +16,15 @@
 #define COMMAND 0x1F7
 #define ALT_STATUS 0x3F6
 //timeout
-#define ATA_TIMEOUT 67676
+#define ATA_TIMEOUT 67676           // haha so funny bro haha
 
 static bool inited;
+static uint16_t ident[256];
 
 int disk_init(void){
     uint8_t data;
     uint8_t status;
-    uint16_t ident[256];
-    uint32_t tries;
+    uint32_t tries = 0;
 
     data = x86_inb(STATUS);
 
@@ -59,7 +59,7 @@ int disk_init(void){
         ident[i] = x86_inw(DATA);
     }
 
-    if (ident[1] == 0x00){
+    if (ident[0] == 0x00){
         serial_puts("hi");
     }
 
