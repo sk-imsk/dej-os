@@ -137,7 +137,8 @@ void kentry(void) {
         }
     }
 
-    disk_init();
+    int a = disk_init();
+    printf("Disk init returned %i", a);
 
     // Fetch the first framebuffer.
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
@@ -156,10 +157,16 @@ void kentry(void) {
     }
 
 
+    void * buffer = givemeapage();
+    ata_read_sector(0, buffer);
+    printf("%s", buffer);
 
 
+    if (ata_read_sector(0, buffer) == 0) {
+        serial_puts("READ OK\n");
 
 
+    }
 
 
     for (;;) __asm__ volatile ("hlt"); // yo dont forget

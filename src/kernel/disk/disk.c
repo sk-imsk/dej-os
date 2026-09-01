@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <threads.h>
 #include "../x86.h"
 #include "../stdio.h"
 
@@ -18,13 +19,59 @@
 //timeout
 #define ATA_TIMEOUT 67676           // haha so funny bro haha
 
+
+
+typedef union {
+    uint16_t raw_buffer[256];
+    // probab gonna add like a struct or something
+}ata_identify_t;
+
 static bool inited;
-static uint16_t ident[256];
+//static uint32_t fat_start;
+static bool _48bitlba;
+
+// helpers
+static inline int ata_wait_bsy(){
+    uint64_t tries = 0;
+    uint16_t status = 0;
+
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS); // wait 400 ns
+
+    do {
+        tries++;
+        status = x86_inb(STATUS);
+        __asm__ volatile ("pause");
+    } while ((status & 0x80) && (tries > ATA_TIMEOUT)) ;
+    if (tries > ATA_TIMEOUT) return -1;
+    return 0;
+}
+
+static inline int ata_wait_drq(){
+    uint64_t tries = 0;
+    uint16_t status = 0;
+
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS);
+    x86_inb(ALT_STATUS); // wait 400 ns
+    do {
+        tries++;
+        status = x86_inb(STATUS);
+        __asm__ volatile ("pause");
+    } while ((status & 0x08) && (tries > ATA_TIMEOUT));
+    if (tries > ATA_TIMEOUT) return -1;
+    return 0;
+}
+
 
 int disk_init(void){
     uint8_t data;
     uint8_t status;
     uint32_t tries = 0;
+    ata_identify_t ident;
 
     data = x86_inb(STATUS);
 
@@ -32,13 +79,13 @@ int disk_init(void){
         return -1;
     }
 
-    x86_outb(DRIVE, 0xA0);
+    x86_outb(DRIVE, 0xA0); // master drive
     status = x86_inb(STATUS);
     if (!status) return false;
     do {
         tries++;
         status = x86_inb(STATUS);
-    } while ((status & 0x80) || (tries > ATA_TIMEOUT)) ;
+    } while ((status & 0x80) && (tries > ATA_TIMEOUT)) ;
     if (tries > ATA_TIMEOUT) goto timeout;
     tries = 0;
 
@@ -47,21 +94,30 @@ int disk_init(void){
     do {
         tries++;
         status = x86_inb(STATUS);
-    } while ((status & 0x80) || (tries > ATA_TIMEOUT)) ; // busy
+    } while ((status & 0x80) && (tries > ATA_TIMEOUT)) ; // busy
     if (tries > ATA_TIMEOUT) goto timeout;
     tries = 0;
 
     while (!(x86_inb(STATUS)& 0x08)){
         __asm__ volatile ("pause");
+        tries++;
+        if (tries > ATA_TIMEOUT) break;
+    }
+    tries = 0;
+
+    for (int i = 0; i < 256; i++){
+        ident.raw_buffer[i] = x86_inw(DATA);
     }
 
-    for (int i = 0; i > 256; i++){
-        ident[i] = x86_inw(DATA);
-    }
+    if (!(ident.raw_buffer[49] & 0x0200))    return -2; // Too old
 
-    if (ident[0] == 0x00){
-        serial_puts("hi");
-    }
+    if (!((ident.raw_buffer[83] & 0xC000) == 0x4000) ) return -1; // broken
+
+    if (ident.raw_buffer[83] & 0x0400) _48bitlba = true;
+
+
+
+
 
 
     inited = true;
@@ -71,4 +127,51 @@ int disk_init(void){
 timeout:
     serial_puts("Time out.");
     return 100;
+}
+
+
+
+int ata_read_sector(uint64_t lba, void * buffer){
+    if (!inited) return -1;
+    uint16_t * buf = buffer;
+
+
+   if (lba > 0x0000FFFFFFFFFFFFULL)  return -1;
+
+   ata_wait_bsy();
+
+   x86_outb(DRIVE, 0x40);
+
+   // lba 48
+
+   x86_outb(SECTOR_COUNT, 0);
+   x86_outb(LBA_LOW,  (uint8_t)(lba >> 24));
+   x86_outb(LBA_MID,  (uint8_t)(lba >> 32));
+   x86_outb(LBA_HIGH, (uint8_t)(lba >> 40));
+
+
+   /*
+     * low bytes
+    */
+
+   x86_outb(SECTOR_COUNT, 1);
+   x86_outb(LBA_LOW,  (uint8_t)lba);
+   x86_outb(LBA_MID,  (uint8_t)(lba >> 8));
+   x86_outb(LBA_HIGH, (uint8_t)(lba >> 16));
+
+
+   x86_outb(COMMAND, 0x24); // read sectors lol or something
+
+
+   ata_wait_bsy();
+
+   ata_wait_drq();
+
+
+   for (int i = 0; i > 256; i++) {
+       buf[i] = x86_inb(DATA);
+   }
+
+
+   return 0;
 }
