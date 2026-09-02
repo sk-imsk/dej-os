@@ -27,45 +27,58 @@ typedef union {
 }ata_identify_t;
 
 static bool inited;
-//static uint32_t fat_start;
 static bool _48bitlba;
 
 // helpers
-static inline int ata_wait_bsy(){
+static inline int ata_wait_bsy(void)
+{
     uint64_t tries = 0;
-    uint16_t status = 0;
+    uint8_t status;
 
     x86_inb(ALT_STATUS);
     x86_inb(ALT_STATUS);
     x86_inb(ALT_STATUS);
-    x86_inb(ALT_STATUS); // wait 400 ns
+    x86_inb(ALT_STATUS); // wait like 400 ns or something
+
 
     do {
-        tries++;
         status = x86_inb(STATUS);
+
+        if (!(status & 0x80))
+            return 0;
+
+        if (++tries >= ATA_TIMEOUT)
+            return -1;
+
         __asm__ volatile ("pause");
-    } while ((status & 0x80) && (tries > ATA_TIMEOUT)) ;
-    if (tries > ATA_TIMEOUT) return -1;
-    return 0;
+    } while (1);
 }
 
-static inline int ata_wait_drq(){
+static inline int ata_wait_drq(void)
+{
     uint64_t tries = 0;
-    uint16_t status = 0;
+    uint8_t status;
 
     x86_inb(ALT_STATUS);
     x86_inb(ALT_STATUS);
     x86_inb(ALT_STATUS);
-    x86_inb(ALT_STATUS); // wait 400 ns
+    x86_inb(ALT_STATUS); // wait 400 ns or something
+
     do {
-        tries++;
         status = x86_inb(STATUS);
-        __asm__ volatile ("pause");
-    } while ((status & 0x08) && (tries > ATA_TIMEOUT));
-    if (tries > ATA_TIMEOUT) return -1;
-    return 0;
-}
 
+        if (status & 0x01)
+            return -2; // ERR
+
+        if (status & 0x08)
+            return 0;  // DRQ
+
+        if (++tries >= ATA_TIMEOUT)
+            return -1;
+
+        __asm__ volatile ("pause");
+    } while (1);
+}
 
 int disk_init(void){
     uint8_t data;
@@ -131,7 +144,7 @@ timeout:
 
 
 
-int ata_read_sector(uint64_t lba, void * buffer){
+static int ata_read_sector(uint64_t lba, void * buffer){
     if (!inited) return -1;
     uint16_t * buf = buffer;
 
@@ -168,8 +181,8 @@ int ata_read_sector(uint64_t lba, void * buffer){
    ata_wait_drq();
 
 
-   for (int i = 0; i > 256; i++) {
-       buf[i] = x86_inb(DATA);
+   for (int i = 0; i < 256; i++) {
+       buf[i] = x86_inw(DATA);
    }
 
 
