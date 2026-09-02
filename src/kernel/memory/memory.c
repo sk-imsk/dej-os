@@ -36,10 +36,10 @@ int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_respo
                 // basically i aint gonna use yet but later sure
                 break;
             case LIMINE_MEMMAP_BAD_MEMORY:
-                serial_puts("Bad memory at");
                 uint64_to_hex(memmap->entries[i]->base, buffer);
-                serial_puts(buffer);
-                serial_puts("\n");
+                printf("Bad memory at %ull ", buffer);
+                uint64_to_hex(memmap->entries[i]->length, buffer);
+                printf("Length %ull \r\n", buffer);
                 break;
             case LIMINE_MEMMAP_ACPI_NVS:
                 break;

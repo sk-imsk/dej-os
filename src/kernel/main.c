@@ -145,7 +145,7 @@ void kentry(void) {
 
 
 
-    printf("hello %i %s %i", 1, "hi", 39);
+
     size_t frame = 0;
 
     while (1) {
