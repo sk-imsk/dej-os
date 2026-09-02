@@ -157,24 +157,10 @@ void kentry(void) {
     }
 
 
-    void * buffer = givemeapage();
-    uint8_t * buf = buffer;
 
-    if (ata_read_sector(1, buf) == 0) {
-        serial_puts("READ OK\n");
-        if (buf[0] == 'E' &&
-            buf[1] == 'F' &&
-            buf[2] == 'I' &&
-            buf[3] == ' ' &&
-            buf[4] == 'P' &&
-            buf[5] == 'A' &&
-            buf[6] == 'R' &&
-            buf[7] == 'T') {
-            serial_puts("GPT OK\n");
-        }else {
-            printf("gpt wrong lil bro ");
-        }
-    }
+
+
+
 
     for (;;) __asm__ volatile ("hlt"); // yo dont forget
 }

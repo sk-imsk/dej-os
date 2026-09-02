@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=c11 -g -mrdrnd -Wall -Werror
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=c11 -g -mrdrnd -Wall -Wextra -Werror -Wpedantic -o2
 # bro too many args bro
 LD := ld.lld
 

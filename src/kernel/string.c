@@ -95,7 +95,7 @@ char * strcpy(char *restrict dst, const char *restrict src){
 }
 
 char * strncpy(char *restrict dst, const char *restrict src, size_t size){
-	int i = 0;
+	size_t i = 0;
 	char * ret = dst;
 	while ((*dst++ = *src++ )&& (i < size)){
 		i++;
@@ -118,7 +118,7 @@ int strcmp(const char * s1, const char * s2){
 
 
 
-#if !(__has_builtin(__builtin_strncmp))
+
 int strncmp (const char * s1, const char *s2, size_t size){
 while (*s1 && (*s1 == *s2)){
 	if (size == 0){
@@ -131,7 +131,7 @@ while (*s1 && (*s1 == *s2)){
 
 return 0;
 }
-#endif
+
 
 
 char *strcat(char *restrict dst, const char *restrict src)
@@ -147,7 +147,6 @@ char *strcat(char *restrict dst, const char *restrict src)
 }
 
 
-#if !(__has_builtin(__builtin_strlen))
 size_t strlen(const char *restrict src){
 	size_t ret = 0;
 	while (*src++ != '\0'){
@@ -155,7 +154,7 @@ size_t strlen(const char *restrict src){
 	}
 	return ret;
 }
-#endif
+
 
 size_t strnlen(const char *restrict src, size_t size){
 	size_t ret = 0;
