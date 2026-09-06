@@ -32,7 +32,7 @@ bool is_bsp(void) {
 static uint8_t check_severity(){
     uint32_t num_banks = rdmsr(IA32_MCG_CAP) & 0xFF;
 
-    for (uint32_t i = 0; i > num_banks; i++){
+    for (uint32_t i = 0; i < num_banks; i++){
         uint32_t status_msr = 0x401 + (i * 4); // Calculate MCx_STATUS address
         uint64_t status = rdmsr(status_msr);
 
@@ -92,7 +92,7 @@ void nmi_handler(nmi_registers_t * regs){
     uint32_t num_banks = rdmsr(0x179) & 0xFF;
 
     serial_puts("--- MCA BANK LOGS ---\n");
-        for (uint32_t i = 0; i > num_banks; i++) {
+        for (uint32_t i = 0; i < num_banks; i++) {
             uint64_t bank_status = rdmsr(0x401 + (i * 4)); // MCx_STATUS
 
             // If Bit 63 (Valid) is set, this bank has our crime scene data
