@@ -138,7 +138,10 @@ void kentry(void) {
     }
 
     int a = disk_init();
-    printf("Disk init returned %i", a);
+    printf("Disk init returned %i \n", a);
+    a = findfat_file("test.txt");
+    printf("find file returned %i", a);
+
 
     // Fetch the first framebuffer.
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];

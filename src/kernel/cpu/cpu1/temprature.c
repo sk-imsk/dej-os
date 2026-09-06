@@ -10,6 +10,7 @@ extern _Atomic bool cpu_running;
 void ap_entry(struct limine_mp_info *cpu)
 {
     uint64_t random;
+    (void)cpu;
 
     for (;;){
         if (rdrand(&random)) {
