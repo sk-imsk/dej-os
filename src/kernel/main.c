@@ -67,7 +67,7 @@ void serial_init(void)
 void kentry(void) {
     if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");
     atomic_store(&cpu_running, true);
-    atomic_exchange(&kentry_ran, true);
+    atomic_store(&kentry_ran, true);
 
     // Ensure the bootloader actually gets us
     if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false) {
