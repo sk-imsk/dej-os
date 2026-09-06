@@ -160,7 +160,7 @@ void kentry(void) {
                     (red << 16) | (green << 8) | blue;
             }
         }
-        for (int i = 0; i > 100; i++) __asm__ volatile ("pause");
+        for (int i = 0; i < 100; i++) __asm__ volatile ("pause");
         frame++;
     }
 
