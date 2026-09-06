@@ -7,7 +7,7 @@ SRC_DIR = src
 TOOLS_DIR = tools
 BUILD_DIR = build
 
-.PHONY: all floppy_img kernel bootloader clean always tools_fat
+.PHONY: all floppy_img kernel bootloader clean always tools_fat qemu
 
 all: floppy_img tools_fat
 
@@ -60,7 +60,8 @@ $(BUILD_DIR)/tools/fat: always $(TOOLS_DIR)/fat/fat.c
 	$(CC) -g -o $(BUILD_DIR)/tools/fat $(TOOLS_DIR)/fat/fat.c
 
 
-
+qemu: all
+	qemu-system-i386 -drive format=raw,file=build/main_floppy.img,if=floppy
 
 
 always:
