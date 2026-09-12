@@ -1,4 +1,5 @@
 //keyboard.h
+#ifdef __x86_64__
 
 #define KEYBOARD_SET2
 #ifdef KEYBOARD_SET2
@@ -319,3 +320,6 @@ static const key_t set2_e0_table[256] = {
 
 int keyboard_init(void);
 key_t keyboard_poll_k();
+
+
+#endif

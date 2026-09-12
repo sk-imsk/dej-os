@@ -1,15 +1,16 @@
 // the kernel ig
-#include <x86.h>
 #include <lim/limine.h>
-#include <stdio.h>
-#include <interrupt/interrupt.h>
+#include <dej/stdio.h>
+#include <dej/interrupt.h>
 #include <memory/memory.h>
-#include <string.h>
+#include <dej/string.h>
 #include <stdint.h>
-#include <panic.h>
-#include <msr.h>
+#include <stdbool.h>
+#include <dej/panic.h>
+#include <dej/msr.h>
 #include <stdatomic.h>
-#include <cpu.h>
+#include <dej/cpu.h>
+#include <dej/stdio.h>
 
 extern void ap_entry(struct limine_mp_info *cpu);
 
@@ -54,16 +55,7 @@ static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARK
 static _Atomic bool kentry_ran = false;
 _Atomic bool cpu_running;
 
-void serial_init(void)
-{
-    x86_outb(0x3F8 + 1, 0x00); // Disable interrupts
-    x86_outb(0x3F8 + 3, 0x80); // Enable DLAB
-    x86_outb(0x3F8 + 0, 0x03); // Baud divisor low: 38400
-    x86_outb(0x3F8 + 1, 0x00); // Baud divisor high
-    x86_outb(0x3F8 + 3, 0x03); // 8 bits, no parity, 1 stop bit
-    x86_outb(0x3F8 + 2, 0xC7); // Enable FIFO
-    x86_outb(0x3F8 + 4, 0x0B); // IRQs enabled, RTS/DSR
-}
+
 
 
 void kentry(void) {
@@ -97,25 +89,11 @@ void kentry(void) {
     }
 
 
-
     serial_init();
-    idt_init();
+    interrupt_init();
     memory_init(memmap_request.response, hhdm_request.response);
 
-
-    if (x86_inb(0x92) == 4) {
-        serial_puts("Last system failure caused by watchdog");
-        __asm__ volatile (
-            "in $0x92, %%al\n\t"
-            "and $0xfb, %%al\n\t"
-            "out %%al, $0x92"
-            :
-            :
-            : "al"
-        );
-
-
-    }
+    cpu_clear_watchdog();
 
     serial_puts("kentry\n");
 
@@ -128,7 +106,7 @@ void kentry(void) {
     for (uint64_t i = 0; i < mp->cpu_count; i++) {
         struct limine_mp_info *cpu = mp->cpus[i];
 
-        if (cpu->lapic_id != mp->bsp_lapic_id) {
+        if (cpu->CPU_ID != mp->BSP_ID) {
             __atomic_store_n(
                 &cpu->goto_address,
                 ap_entry,

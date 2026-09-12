@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with: 
+      with:
        submodules: recursive
 
     - name: Install dependencies
@@ -24,7 +24,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y nasm llvm lld
 
-    - name: Run check
+    - name: run configure
+      run: ./configure
+
+    - name: check x86_64
       run: make
-    
-      

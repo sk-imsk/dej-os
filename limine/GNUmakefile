@@ -17,10 +17,10 @@ override datarootdir := ${prefix}/share
 override mandir := ${datarootdir}/man
 override docdir := ${datarootdir}/doc/${PACKAGE_TARNAME}
 
-override BUILDDIR := /home/baller/src/dej-os/limine
+override BUILDDIR := /Users/justauser/src/dej-os/limine
 override BINDIR := $(BUILDDIR)/bin
 
-override SRCDIR := /home/baller/src/dej-os/limine
+override SRCDIR := /Users/justauser/src/dej-os/limine
 
 override SPACE := $(subst ,, )
 override COMMA := ,
@@ -32,7 +32,7 @@ override NASMESCAPE = $(subst ','"'$(COMMA) \"'\"$(COMMA) '"',$(1))
 override BUILD_BIOS := 
 override BUILD_UEFI_X86_64 := 
 override BUILD_UEFI_IA32 := 
-override BUILD_UEFI_AARCH64 := 
+override BUILD_UEFI_AARCH64 := limine-uefi-aarch64
 override BUILD_UEFI_RISCV64 := 
 override BUILD_UEFI_LOONGARCH64 := 
 override BUILD_UEFI_CD := no
@@ -44,13 +44,13 @@ INSTALL_PROGRAM := ${INSTALL}
 INSTALL_DATA := ${INSTALL} -m 644
 STRIP := strip
 
-MKDIR_P := /usr/sbin/mkdir -p
+MKDIR_P := mkdir -p
 export MKDIR_P
-GREP := /usr/sbin/grep
+GREP := /usr/bin/grep
 export GREP
-SED := /usr/sbin/sed
+SED := /usr/bin/sed
 export SED
-AWK := gawk
+AWK := awk
 export AWK
 
 CC := gcc
@@ -66,7 +66,7 @@ CC_FOR_TARGET := clang
 export CC_FOR_TARGET
 LD_FOR_TARGET := ld.lld
 export LD_FOR_TARGET
-OBJCOPY_FOR_TARGET := llvm-objcopy
+OBJCOPY_FOR_TARGET := /opt/homebrew/opt/llvm/bin/llvm-objcopy
 export OBJCOPY_FOR_TARGET
 OBJDUMP_FOR_TARGET := llvm-objdump
 export OBJDUMP_FOR_TARGET

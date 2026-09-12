@@ -2,13 +2,17 @@
 // ps2 keyboard driverrr
 // For ps2 keyboard support
 // built on assumptions
+// only x86 lol
 //
-#include <x86.h>
+
+#ifdef __x86_64__
+
+#include <arch/x86/x86.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "keyboard.h"
-#include <cpu.h>
+#include <dej/cpu.h>
 
 #define waittosend while (x86_inb(0x64) & 0x02) \
     cpu_takebreak();
@@ -202,3 +206,6 @@ start:
 
     return -1;
 }
+
+
+#endif

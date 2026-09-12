@@ -1,9 +1,9 @@
 #include <lim/limine.h>
 #include <stdatomic.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <random.h>
-#include <cpu.h>
+#include <dej/stdio.h>
+#include <dej/random.h>
+#include <dej/cpu.h>
 extern _Atomic uint64_t temperature;
 
 volatile uint64_t ap_started = 0;
@@ -12,7 +12,7 @@ extern _Atomic bool cpu_running;
 void ap_entry(struct limine_mp_info *cpu)
 {
     uint64_t random;
-    printf("cpu %i is ready to read the temperature\n", cpu->lapic_id);
+    printf("cpu %i is ready to read the temperature\n", cpu->CPU_ID);
 
     for (;;){
         if (rdrand(&random)) {

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+
+
+
+if [ "$1" = "arch" ]
+then
+    arch=$2
+else
+    arch=$(uname -m)
+fi
+
+
+if [ "$arch" = "x86_64" ]
+then
+cp config/makefile_x86 ./Makefile
+
+elif  [ "$arch" = "arm64" ]
+then
+cp config/makefile_arm64 ./Makefile
+
+else
+    echo "$arch not supported"
+fi
