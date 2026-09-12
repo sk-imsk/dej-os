@@ -13,11 +13,11 @@ fi
 
 if [ "$arch" = "x86_64" ]
 then
-cp config/makefile_x86 ./Makefile
+cp config/Makefile_x86 ./Makefile
 
 elif  [ "$arch" = "arm64" ]
 then
-cp config/makefile_arm64 ./Makefile
+cp config/Makefile_arm64 ./Makefile
 
 else
     echo "$arch not supported"
