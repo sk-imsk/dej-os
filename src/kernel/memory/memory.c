@@ -12,6 +12,7 @@ static struct page page_list[10000];
 static struct limine_hhdm_response * hhdm;
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * _hhdm){
+    printf("Page tables or something ");
     hhdm = _hhdm;
     uint64_t amount;
     uint64_t add = 0;
@@ -93,4 +94,22 @@ void retpage(void * ptr){
 
    }
    panic("Attempted deallocation of nonexistent page");
+}
+
+
+bool vm_map(uint64_t * pm14, uint64_t virt, uint64_t phys, uint64_t flags){
+    if (unlikely(!inited)) return ENXIO;
+    (void)pm14;
+    (void)phys;
+    (void)virt;
+    (void)flags;
+
+    return false;
+}
+
+bool vm_unmap(uint64_t * pm14, uint64_t phys){
+    if (unlikely(!inited)) return ENXIO;
+    (void)pm14;
+    (void)phys;
+    return false;
 }
