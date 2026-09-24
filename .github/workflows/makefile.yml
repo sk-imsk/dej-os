@@ -17,19 +17,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-       submodules: recursive
+        submodules: recursive
 
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y nasm llvm lld
 
-    - name: Do limine things
+    - name: Build Limine
       run: |
-          ./limine/bootstrap
-          ./limine/configure  --enable-bios
-          make
+        cd limine
+        ./bootstrap
+        ./configure --enable-bios
+        make
 
     - name: Run check
-      run:
-        make -f Makefile
+      run: make -f Makefile
