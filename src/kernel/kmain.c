@@ -1,7 +1,7 @@
 #include <dej/kernel.h>
 #include <dej/cpu.h>
 #include <dej/limine.h>
-#include "drivers/framebuffer/framebuffer.h"
+#include <dej/framebuffer.h>
 
 
 struct limine_framebuffer *framebuffer;

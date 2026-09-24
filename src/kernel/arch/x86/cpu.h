@@ -1,9 +1,11 @@
 // cpu.h
 #pragma once
 #include <dej/kernel.h>
+#include <dej/stdio.h>
+#include <x86/x86.h>
 
 
-#define cpu_id lapic_id
+#define apic_id lapic_id
 #define bsp_id bsp_lapic_id
 
 static inline void cpu_takebreak(void){

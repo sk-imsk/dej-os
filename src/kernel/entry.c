@@ -119,7 +119,7 @@ void kentry(void) {
     for (uint64_t i = 0; i < mp->cpu_count; i++) {
         struct limine_mp_info *cpu = mp->cpus[i];
 
-        if (cpu->cpu_id != mp->bsp_id) {
+        if (cpu->apic_id != mp->bsp_id) {
             __atomic_store_n(
                 &cpu->goto_address,
                 ap_entry,
