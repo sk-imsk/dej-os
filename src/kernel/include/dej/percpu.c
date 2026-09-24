@@ -7,7 +7,7 @@
 uint8_t *cpu_percpu[MAX_CPUS];
 
 void setupbspcpudata(){
-    char * n_block = givemeapage();
+    char * n_block = KGetPage();
     memset(n_block, 0, 4096);
     memcpy(n_block, __percpu_start, percpu_size);
     wrmsr(0xC0000101, (uint64_t)n_block);

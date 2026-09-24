@@ -1,7 +1,7 @@
 #include <limine.h>
 #include <dej/cpu.h>
 #include <stdint.h>
-#include "cpu1/temprature.h"
+#include "cpu1/temperature.h"
 #include "cpu2/health.h"
 #include "../memory/memory.h"
 #include <dej/panic.h>
@@ -40,7 +40,7 @@ void ap_entry(struct limine_mp_info *cpu){
         panic("percpu tables too big prob like something wrong or ill fix it later or something\n");
     }
 
-    char * n_block = givemeapage();
+    char * n_block = KGetPage();
     memset(n_block, 0, 4096);           // zero out
 
     memcpy(n_block, __percpu_start, percpu_size);

@@ -446,7 +446,7 @@ static int findfat_file(const char * fname, struct direntry *out, uint32_t dir_c
     Assert_sil_chill();
     if (!inited) return -1;
     if (strnlen(fname, 12) == 12) return -1;
-    void * cluster = givemeapage();
+    void * cluster = KGetPage();
 
     uint8_t fat_name[11];
     conv_tosfn(fname, fat_name);
