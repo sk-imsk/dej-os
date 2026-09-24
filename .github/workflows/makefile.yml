@@ -27,14 +27,9 @@ jobs:
     - name: Do limine things
       run: |
           ./limine/bootstrap
-          ./limine/configure
+          ./limine/configure  --enable-bios
+          make
 
     - name: Run check
-      run: |
-        pwd
-        echo "===== Makefile ====="
-        head -20 Makefile
-        echo "===== make database ====="
-        make -pn | grep -E '^all1:|^all:|^kernel:|^image:'
-        echo "===== dry run ====="
-        make -n
+      run:
+        make -f Makefile
