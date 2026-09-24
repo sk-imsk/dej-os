@@ -24,7 +24,6 @@ static uint64_t * Vpd;
 
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * _hhdm){
-    printf("Page tables or something ");
     hhdm = _hhdm;
     uint64_t amount;
     uint64_t add = 0;
