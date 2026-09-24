@@ -66,22 +66,6 @@ void serial_init(void)
     x86_outb(0x3F8 + 4, 0x0B); // IRQs enabled, RTS/DSR
 }
 
-static inline void check_watchdog() {
-    if (x86_inb(0x92) == 4) {
-        serial_puts("Last system failure caused by watchdog");
-        __asm__ volatile (
-            "in $0x92, %%al\n\t"
-            "and $0xfb, %%al\n\t"
-            "out %%al, $0x92"
-            :
-            :
-            : "al"
-        );
-
-
-    }
-}
-
 void kentry(void) {
     if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");
     atomic_store(&kentry_ran, true);
@@ -135,7 +119,7 @@ void kentry(void) {
     for (uint64_t i = 0; i < mp->cpu_count; i++) {
         struct limine_mp_info *cpu = mp->cpus[i];
 
-        if (cpu->lapic_id != mp->bsp_lapic_id) {
+        if (cpu->cpu_id != mp->bsp_id) {
             __atomic_store_n(
                 &cpu->goto_address,
                 ap_entry,
