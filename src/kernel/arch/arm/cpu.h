@@ -1,7 +1,7 @@
 // cpu.h
 #pragma once
 
-#define cpu_id processor_id
+#define apic_id processor_id
 #define bsp_id bsp_mpidr
 
 static inline void cpu_takebreak(void){
