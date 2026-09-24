@@ -30,4 +30,11 @@ jobs:
           ./limine/configure
 
     - name: Run check
-      run: make
+      run: |
+        pwd
+        echo "===== Makefile ====="
+        head -20 Makefile
+        echo "===== make database ====="
+        make -pn | grep -E '^all1:|^all:|^kernel:|^image:'
+        echo "===== dry run ====="
+        make -n
