@@ -14,10 +14,18 @@ KERNEL := $(BUILD_DIR)/kernel.elf
 IMAGE := $(BUILD_DIR)/dej-os.img
 MNT := $(BUILD_DIR)/mnt
 
-C_SOURCES := $(shell find $(KERNEL_DIR) -name '*.c')
+ARCH ?= x86
+
+C_SOURCES := $(shell find $(KERNEL_DIR) -name '*.c' \
+    -not -path '$(KERNEL_DIR)/arch/*' \
+    -o -path '$(KERNEL_DIR)/arch/$(ARCH)/*.c')
+
 C_OBJECTS := $(patsubst $(KERNEL_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
 
-ASM_SOURCES := $(shell find $(KERNEL_DIR) -name '*.asm')
+ASM_SOURCES := $(shell find $(KERNEL_DIR) -name '*.asm' \
+    -not -path '$(KERNEL_DIR)/arch/*' \
+    -o -path '$(KERNEL_DIR)/arch/$(ARCH)/*.asm')
+
 ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 .PHONY: all kernel image run clean
 
