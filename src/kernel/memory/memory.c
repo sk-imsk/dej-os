@@ -10,6 +10,11 @@ struct page{
     uint64_t start;
     bool used;
 };
+typedef struct address_space {
+    uint64_t pml4_phys;
+    uint64_t *pml4;
+} address_space_t;
+
 static struct page page_list[10000];
 static struct limine_hhdm_response * hhdm;
 static raw_page pml4;
@@ -21,6 +26,25 @@ static uint64_t * Vpdpt;
 static uint64_t * Vpt;
 static uint64_t * Vpd;
 
+static inline always_inline uint64_t get_cr3(void)
+{
+    uint64_t cr3;
+
+    __asm__ volatile (
+        "mov %%cr3, %0"
+        : "=r"(cr3)
+    );
+
+    return cr3;
+}
+static inline always_inline void write_cr3(uint64_t val){
+    __asm__ volatile (
+        "mov %0, %%cr3"
+        :
+        : "r"(val)
+        : "memory"
+    );
+}
 
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * _hhdm){
@@ -76,6 +100,7 @@ end:
 static inline always_inline void * phys2virt(raw_page addr){
     return (void *)(addr + hhdm->offset);
 }
+
 // returns pointer to 4 Kib page
 void * KGetPage(){
 
@@ -100,6 +125,68 @@ raw_page __giverawpage(){
     page_list[i].used = true;
 
     return (uint64_t)(page_list[i].start);
+}
+
+static int map_page(address_space_t *pml4, uint64_t virt, uint64_t phys, uint64_t flags)
+{
+    uint64_t pml4_i = (virt >> 39) & 0x1FF;
+    uint64_t pdpt_i = (virt >> 30) & 0x1FF;
+    uint64_t pd_i   = (virt >> 21) & 0x1FF;
+    uint64_t pt_i   = (virt >> 12) & 0x1FF;
+
+    uint64_t *pdpt;
+    uint64_t *pd;
+    uint64_t *pt;
+
+    /*
+     * PML4 -> PDPT
+     */
+    if (!(pml4->pml4[pml4_i] & PAGE_PRESENT)) {
+        uint64_t page = __giverawpage();
+
+        memset(phys2virt(page), 0, PAGE_SIZE);
+
+        pml4->pml4[pml4_i] = page | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    }
+
+    pdpt = phys2virt(pml4->pml4[pml4_i] & ~0xFFFULL);
+
+    /*
+     * PDPT -> PD
+     */
+    if (!(pdpt[pdpt_i] & PAGE_PRESENT)) {
+        uint64_t page = __giverawpage();
+
+        memset(phys2virt(page), 0, PAGE_SIZE);
+
+        pdpt[pdpt_i] = page | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    }
+
+    pd = phys2virt(pdpt[pdpt_i] & ~0xFFFULL);
+
+    /*
+     * PD -> PT
+     */
+    if (!(pd[pd_i] & PAGE_PRESENT)) {
+        uint64_t page = __giverawpage();
+
+        memset(phys2virt(page), 0, PAGE_SIZE);
+
+        pd[pd_i] = page | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    }
+
+    pt = phys2virt(pd[pd_i] & ~0xFFFULL);
+
+    /*
+     * PT -> actual physical page
+     */
+    if (pt[pt_i] & PAGE_PRESENT) {
+        return -1; // already mapped
+    }
+
+    pt[pt_i] = phys | flags;
+
+    return 0;
 }
 
 // must be from givemepage or else ill take down the system
@@ -139,20 +226,41 @@ int virtual_memory_init(void){
     memset(Vpd, 0, PAGE_SIZE);
 
 
-    Vpml4[0] = pdpt | PAGE_PRESENT | PAGE_WRITE;
-    Vpdpt[0] = pd   | PAGE_PRESENT | PAGE_WRITE;
-    Vpd[0]   = pt   | PAGE_PRESENT | PAGE_WRITE;
 
-    uint64_t page = __giverawpage();
-    Vpt[0] = page | PAGE_PRESENT | PAGE_WRITE;
+    uint64_t cr3 = get_cr3();
+    uint64_t *kernel_pml4 = phys2virt(cr3 & ~0xFFFULL);
+
+    address_space_t newpml4;
+    newpml4.pml4_phys = __giverawpage();
+    newpml4.pml4 = phys2virt(newpml4.pml4_phys);
+
+    memset(newpml4.pml4, 0, PAGE_SIZE);
+
+    for (int i = 0; i < 512; i++) {
+        newpml4.pml4[i] = kernel_pml4[i];
+    }
 
 
+    uint64_t user_page = __giverawpage();
 
+    memset(phys2virt(user_page), 0, PAGE_SIZE);
+
+    map_page(
+        &newpml4,
+        0x400000,
+        user_page,
+        PAGE_PRESENT | PAGE_WRITE | PAGE_USER
+    );
+
+
+    write_cr3(newpml4.pml4_phys);
 
 
 
     return 0;
 }
+
+
 
 bool vm_map(uint64_t * pm14, uint64_t virt, uint64_t phys, uint64_t flags){
     if (unlikely(!inited)) return ENXIO;
