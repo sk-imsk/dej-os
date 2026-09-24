@@ -86,6 +86,7 @@ void kentry(void) {
     if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");
     atomic_store(&kentry_ran, true);
 
+
     // Ensure the bootloader actually gets us
     if (unlikely(LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false)) {
         panic("Bootloader doesnt support our revision");

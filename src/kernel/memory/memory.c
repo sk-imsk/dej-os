@@ -12,7 +12,6 @@ static struct page page_list[10000];
 static struct limine_hhdm_response * hhdm;
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * _hhdm){
-    printf("Page tables or something ");
     hhdm = _hhdm;
     uint64_t amount;
     uint64_t add = 0;
