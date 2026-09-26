@@ -8,7 +8,7 @@
 
 // just kinda dumps stuff in the serial no locks or shit
 #define puts(x) serial_puts(x)
-void serial_puts(const char *s) {
+void __attribute((__no_caller_saved_registers__)) serial_puts(const char *s) {
     while (*s) {
         // 1. Wait for the hardware transmitter buffer to be empty
         // 0x3FD is the Line Status Register. Bit 5 (0x20) means "Ready to Transmit"

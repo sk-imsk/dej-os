@@ -41,7 +41,7 @@ global int_divide_by_0
 int_divide_by_0:
     PUSH_ALL
 
-
+    cld
     call divide_by_0_handler
 
 
@@ -54,9 +54,21 @@ int_nmi:
     PUSH_ALL
 
     mov rdi, rsp
-
+    cld
     call nmi_handler
 
+
+    POP_ALL
+    iretq
+
+extern tss_handler
+global int_tss
+int_tss:
+    PUSH_ALL
+
+    mov rdi, rsp
+    cld
+    call tss_handler
 
     POP_ALL
     iretq
@@ -67,6 +79,7 @@ int_general_protection_fault:
     PUSH_ALL
 
     mov rdi, rsp
+    cld
     call general_protection_fault_handler
 
 
