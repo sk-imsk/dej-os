@@ -103,7 +103,6 @@ void kentry(void) {
     memory_init(memmap_request.response, hhdm_request.response);
     virtual_memory_init();
     user_space_init();
-    setupbspcpudata();
     ata_init();
     check_watchdog();
 

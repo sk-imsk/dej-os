@@ -5,6 +5,7 @@
 #include "memory.h"
 #include <dej/cpu.h>
 #include <dej/sil.h>
+#include <x86/tss.h>
 
 #define USER_CODE  0x400000
 #define USER_STACK 0x800000
@@ -264,25 +265,26 @@ void user_space_init(void){
 
 
     user_as.pml4_phys = __giverawpage();
-        user_as.pml4 = phys2virt(user_as.pml4_phys);
-
+    user_as.pml4 = phys2virt(user_as.pml4_phys);
         // 1. Zero out lower half (user space, indices 0-255)
-        memset(&user_as.pml4[0], 0, 256 * sizeof(uint64_t));
+    memset(&user_as.pml4[0], 0, 256 * sizeof(uint64_t));
 
         // 2. Copy higher half from current active kernel PML4 (indices 256-511)
-        uint64_t *current_pml4 = (uint64_t *)phys2virt(get_cr3() & ~0xFFFULL);
-        memcpy(&user_as.pml4[256], &current_pml4[256], 256 * sizeof(uint64_t));
+    uint64_t *current_pml4 = (uint64_t *)phys2virt(get_cr3() & ~0xFFFULL);
+    memcpy(&user_as.pml4[256], &current_pml4[256], 256 * sizeof(uint64_t));
 
         // 3. Map user code and stack into lower half
-        uint64_t page = __giverawpage();
-        memset(phys2virt(page), 0, PAGE_SIZE);
-        map_page(&user_as, USER_CODE, page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
+    uint64_t page = __giverawpage();
+    memset(phys2virt(page), 0, PAGE_SIZE);
+    map_page(&user_as, USER_CODE, page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
 
-        uint64_t stack_page = __giverawpage();
-        memset(phys2virt(stack_page), 0, PAGE_SIZE);
-        map_page(&user_as, USER_STACK, stack_page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
+    uint64_t stack_page = __giverawpage();
+    memset(phys2virt(stack_page), 0, PAGE_SIZE);
+    map_page(&user_as, USER_STACK, stack_page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
 
-        load_gdt();
+    load_gdt();
+    setupbspcpudata();
+    tss_init();
 
 
 }

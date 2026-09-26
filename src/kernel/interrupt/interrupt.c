@@ -27,6 +27,13 @@ typedef struct {
     uint64_t ss;
 } __attribute__((packed)) page_fault_regs_t;
 
+typedef struct {
+    // General-purpose registers (pushed manually by assembly)
+    uint64_t rax, rcx, rdx, rbx, rbp, rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15;
+
+    uint64_t error_code, rip, cs, rflags,  rsp, ss;
+} __attribute__((__packed__)) tss_regs_t;
+
 struct InterruptDescriptor {
     uint16_t offset_1;
     uint16_t selector;
@@ -87,6 +94,13 @@ void divide_by_0_handler(void){
 extern void int_nmi(void);
 //in nmi.c
 
+extern void int_tss(void);
+void tss_handler(tss_regs_t frame){
+    printf("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame.ss, frame.rflags, frame.cs, frame.rip, frame.rsp, frame.error_code);
+
+    cpu_stop();
+}
+
 extern void int_general_protection_fault(void);
 void general_protection_fault_handler(gp_registers_t * frame){
     printf("gp fault:  rflags %lu cs %lu rip %lu error code %lu", frame->rflags, frame->cs, frame->rip, frame->ec);
@@ -113,6 +127,7 @@ void InterruptInit(void){
 
     idt_set_gate(0, int_divide_by_0);
     idt_set_gate(2, int_nmi);
+    idt_set_gate(10, int_tss);
     idt_set_gate(13, int_general_protection_fault);
     idt_set_gate(14, int_page_fault);// will add more later
 

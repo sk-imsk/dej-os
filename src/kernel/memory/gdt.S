@@ -4,6 +4,7 @@
 .global gdt_start
 .global gdt_end
 .global gdt_descriptor
+.global __tss_descriptor_ptr
 
 gdt_start:
     # Index 0: Null descriptor (Selector 0x00)
@@ -30,6 +31,22 @@ gdt_start:
     # Access: 0x92 (Present, Ring 0, Data, Writable)
     # Flags:  0x00
     .word 0x0000, 0x0000; .byte 0x00, 0x92, 0x00, 0x00
+
+    # Index 7: 64-bit User Code (Selector 0x38 | RPL 3 = 0x3B)
+    # Access: 0xFA (Present, Ring 3, Code, Readable)
+    # Flags:  0x20 (Long Mode L=1)
+    .word 0x0000, 0x0000; .byte 0x00, 0xFA, 0x20, 0x00
+
+    # Index 8: 64-bit User Data (Selector 0x40 | RPL 3 = 0x43)
+    # Access: 0xF2 (Present, Ring 3, Data, Writable)
+    # Flags:  0x00
+    .word 0x0000, 0x0000; .byte 0x00, 0xF2, 0x00, 0x00
+
+    # Index 9 & 10: 64-bit TSS Descriptor (Selector 0x48, 16 bytes total)
+    # Reserved space to be populated dynamically by write_tss_descriptor() in C
+__tss_descriptor_ptr:
+    .quad 0x0000000000000000
+    .quad 0x0000000000000000
 
 gdt_end:
 
