@@ -14,6 +14,19 @@ typedef struct {
     uint64_t ec, rip, cs, rflags;
 } __attribute__((packed)) gp_registers_t;
 
+typedef struct {
+    // General-purpose registers (pushed manually by assembly)
+    uint64_t rax, rcx, rdx, rbx, rbp, rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15;
+
+    // Hardware frame
+    uint64_t error_code; // Pushed automatically by CPU for page faults
+    uint64_t rip;        // Where the fault happened
+    uint64_t cs;         // Code segment
+    uint64_t rflags;     // CPU flags
+    uint64_t rsp;        // Stack pointer before the fault
+    uint64_t ss;
+} __attribute__((packed)) page_fault_regs_t;
+
 struct InterruptDescriptor {
     uint16_t offset_1;
     uint16_t selector;
@@ -35,6 +48,18 @@ struct IDTR {
 _Static_assert(sizeof(struct IDTR) == 10, "IDTR must be 10 bytes");
 
 struct InterruptDescriptor idt[256];
+
+static inline always_inline uint64_t get_cr2(void)
+{
+    uint64_t cr2;
+
+    __asm__ volatile (
+        "mov %%cr2, %0"
+        : "=r"(cr2)
+    );
+
+    return cr2;
+}
 
 void idt_set_gate(uint8_t vector, void (*handler)(void))
 {
@@ -71,7 +96,10 @@ void general_protection_fault_handler(gp_registers_t * frame){
 
 
 extern void int_page_fault(void);
-void page_fault_handler(void){
+void page_fault_handler(page_fault_regs_t frame){
+    printf("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu rsp: %llu \n", frame.cs, frame.error_code, frame.rip, frame.rflags, frame.rsp, frame.ss);
+    uint64_t cr2 = get_cr2();
+    printf("cr2: %llu", cr2);
     serial_puts("page fault");
     cpu_stop();
 }
@@ -86,7 +114,7 @@ void InterruptInit(void){
     idt_set_gate(0, int_divide_by_0);
     idt_set_gate(2, int_nmi);
     idt_set_gate(13, int_general_protection_fault);
-    idt_set_gate(14, int_page_fault);
+    idt_set_gate(14, int_page_fault);// will add more later
 
 
     struct IDTR idtr = {

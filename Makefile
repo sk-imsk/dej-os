@@ -27,6 +27,9 @@ ASM_SOURCES := $(shell find $(KERNEL_DIR) -name '*.asm' \
     -o -path '$(KERNEL_DIR)/arch/$(ARCH)/*.asm')
 
 ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
+
+S_SOURCES := $(shell find $(KERNEL_DIR) -name '*.S')
+S_OBJECTS := $(patsubst $(KERNEL_DIR)/%.S, $(BUILD_DIR)/%.o, $(S_SOURCES))
 .PHONY: all kernel image run clean
 
 all: always image
@@ -34,13 +37,15 @@ all: always image
 kernel: $(KERNEL)
 
 
-$(KERNEL): $(C_OBJECTS) $(ASM_OBJECTS) $(KERNEL_DIR)/linker.ld
-	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS)
+$(KERNEL): $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/linker.ld
+	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS)
 
 $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
 	$(CC) $(CCFLAGS) -c $< -o $@
 $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.asm
 	$(ASM) -f elf64 $< -o $@
+$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.S
+	$(CC) $(CCFLAGS) -c $< -o $@
 
 image: $(IMAGE)
 
@@ -89,6 +94,7 @@ always:
 	mkdir -p build/drivers/framebuffer
 	mkdir -p build/include/dej
 	mkdir -p build/cpu/cpu2
+	mkdir -p build/cpu/cpu3
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

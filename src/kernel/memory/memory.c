@@ -3,6 +3,11 @@
 #include <dej/kernel.h>
 #include <dej/string.h>
 #include "memory.h"
+#include <dej/cpu.h>
+#include <dej/sil.h>
+
+#define USER_CODE  0x400000
+#define USER_STACK 0x800000
 
 static uint64_t pages = 0;
 static bool inited = false;
@@ -17,14 +22,9 @@ typedef struct address_space {
 
 static struct page page_list[10000];
 static struct limine_hhdm_response * hhdm;
-static raw_page pml4;
-static raw_page pdpt;
-static raw_page pt;
-static raw_page pd;
-static uint64_t * Vpml4;
-static uint64_t * Vpdpt;
-static uint64_t * Vpt;
-static uint64_t * Vpd;
+
+
+extern void load_gdt(void);
 
 static inline always_inline uint64_t get_cr3(void)
 {
@@ -49,8 +49,6 @@ static inline always_inline void write_cr3(uint64_t val){
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * _hhdm){
     hhdm = _hhdm;
-    uint64_t amount;
-    uint64_t add = 0;
     for (uint64_t i = 0; i < memmap->entry_count; i++){
 
         switch (memmap->entries[i]->type){
@@ -73,20 +71,38 @@ int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_respo
                 break;
             case LIMINE_MEMMAP_RESERVED:
                 break;
-            case LIMINE_MEMMAP_USABLE:
-                if (pages >= 10000) break;
+            case LIMINE_MEMMAP_USABLE: {
+                if (pages > 10000) break;
+                uint64_t base = memmap->entries[i]->base;
+                uint64_t length = memmap->entries[i]->length;
 
-                amount = (uint64_t)memmap->entries[i]->length / KiB(4);
-                while (amount != 0){
-                   if (pages >= 10000) goto end;
-                   page_list[pages].start = memmap->entries[i]->base + add;
-                   pages++;
-                   add += KiB(4);
-                   amount--;
+
+                // Align base UP to 4KiB boundary
+                if (base & 0xFFF) {
+                    uint64_t align_offset = 0x1000 - (base & 0xFFF);
+                    if (length < align_offset) break;
+                    base += align_offset;
+                    length -= align_offset;
                 }
 
-                add = 0;
+                uint64_t page_count = length / KiB(4);
+
+                for (uint64_t p = 0; p < page_count; p++) {
+                    if (pages >= 10000) goto end;
+
+                    uint64_t phys_addr = base + (p * KiB(4));
+
+                    // RULE 1: Filter out low physical memory below 1MB
+                    if (phys_addr < 0x100000) {
+                        continue;
+                    }
+
+                    page_list[pages].start = phys_addr;
+                    page_list[pages].used = false;
+                    pages++;
+                }
                 break;
+            }
 
 
 
@@ -210,71 +226,63 @@ void retpage(void * ptr){
 }
 
 
-int virtual_memory_init(void){
-    pml4 = __giverawpage();
-    pdpt = __giverawpage();
-    pt = __giverawpage();
-    pd = __giverawpage();
-    Vpml4 = phys2virt(pml4);
-    Vpdpt = phys2virt(pdpt);
-    Vpt = phys2virt(pt);
-    Vpd = phys2virt(pd);
+int virtual_memory_init(void) {
+    cpu_stop_interrupts();
 
-    memset(Vpml4, 0, PAGE_SIZE);
-    memset(Vpdpt, 0, PAGE_SIZE);
-    memset(Vpt, 0, PAGE_SIZE);
-    memset(Vpd, 0, PAGE_SIZE);
+    uint64_t new_pml4_phys = __giverawpage();
 
-
-
-    uint64_t cr3 = get_cr3();
-    uint64_t *kernel_pml4 = phys2virt(cr3 & ~0xFFFULL);
-
-    address_space_t newpml4;
-    newpml4.pml4_phys = __giverawpage();
-    newpml4.pml4 = phys2virt(newpml4.pml4_phys);
-
-    memset(newpml4.pml4, 0, PAGE_SIZE);
-
-    for (int i = 0; i < 512; i++) {
-        newpml4.pml4[i] = kernel_pml4[i];
+    // Safety check for alignment & low memory
+    if (new_pml4_phys < 0x100000 || (new_pml4_phys & 0xFFF) != 0) {
+        return -1; // Allocation failed or unaligned
     }
 
+    uint64_t *new_pml4 = (uint64_t *)phys2virt(new_pml4_phys);
 
-    uint64_t user_page = __giverawpage();
+    uint64_t current_cr3 = get_cr3();
+    uint64_t *boot_pml4 = (uint64_t *)phys2virt(current_cr3 & ~0xFFFULL);
 
-    memset(phys2virt(user_page), 0, PAGE_SIZE);
+    // 1. Copy ONLY higher-half mappings from boot PML4 (indices 256 to 511)
+    memcpy(&new_pml4[256], &boot_pml4[256], 256 * sizeof(uint64_t));
 
-    map_page(
-        &newpml4,
-        0x400000,
-        user_page,
-        PAGE_PRESENT | PAGE_WRITE | PAGE_USER
-    );
-
-
-    write_cr3(newpml4.pml4_phys);
+    // 2. Explicitly zero out lower-half mappings (indices 0 to 255)
+    memset(&new_pml4[0], 0, 256 * sizeof(uint64_t));
 
 
+    // 3. Switch to the new page table
+    write_cr3(new_pml4_phys);
+
+    cpu_enable_interrupts();
 
     return 0;
 }
 
 
 
-bool vm_map(uint64_t * pm14, uint64_t virt, uint64_t phys, uint64_t flags){
-    if (unlikely(!inited)) return ENXIO;
-    (void)pm14;
-    (void)phys;
-    (void)virt;
-    (void)flags;
 
-    return false;
-}
+static address_space_t user_as;
+void user_space_init(void){
 
-bool vm_unmap(uint64_t * pm14, uint64_t phys){
-    if (unlikely(!inited)) return ENXIO;
-    (void)pm14;
-    (void)phys;
-    return false;
+
+    user_as.pml4_phys = __giverawpage();
+        user_as.pml4 = phys2virt(user_as.pml4_phys);
+
+        // 1. Zero out lower half (user space, indices 0-255)
+        memset(&user_as.pml4[0], 0, 256 * sizeof(uint64_t));
+
+        // 2. Copy higher half from current active kernel PML4 (indices 256-511)
+        uint64_t *current_pml4 = (uint64_t *)phys2virt(get_cr3() & ~0xFFFULL);
+        memcpy(&user_as.pml4[256], &current_pml4[256], 256 * sizeof(uint64_t));
+
+        // 3. Map user code and stack into lower half
+        uint64_t page = __giverawpage();
+        memset(phys2virt(page), 0, PAGE_SIZE);
+        map_page(&user_as, USER_CODE, page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
+
+        uint64_t stack_page = __giverawpage();
+        memset(phys2virt(stack_page), 0, PAGE_SIZE);
+        map_page(&user_as, USER_STACK, stack_page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
+
+        load_gdt();
+
+
 }

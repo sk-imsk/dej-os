@@ -101,10 +101,13 @@ void kentry(void) {
     serial_init();
     InterruptInit();
     memory_init(memmap_request.response, hhdm_request.response);
-    setupbspcpudata();
     virtual_memory_init();
+    user_space_init();
+    setupbspcpudata();
     ata_init();
     check_watchdog();
+
+
 
     printf("framebuffer %lux%lu pitch=%lu bpp=%u\n",framebuffer_request.response->framebuffers[0]->height,
         framebuffer_request.response->framebuffers[0]->width,
