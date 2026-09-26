@@ -7,10 +7,11 @@
 #include <dej/kernel.h>
 
 extern _Noreturn void jmp2user(void * rip, void * rsp);
-extern void * ucp;
 
+extern void * u_buf;
 void enter_userspace(void){
 
+    void * buf = (void *)(u_buf);
     struct file_fat32 exec = fat_open("dih.bin");
     if (exec.first_cluster < 2){
         printf("opening dih.bin failed ");
@@ -18,8 +19,8 @@ void enter_userspace(void){
 
     }
 
-    fat_read(exec, ucp);
+    fat_read(exec, buf);
 
-    jmp2user((void *)0x400000, (void *)0x800000 + KiB(4));
+    jmp2user((void *)0x400000, (void *)0x801000 + KiB(4));
 
 }

@@ -19,3 +19,4 @@ int virtual_memory_init(void);
 void * KGetPage(void);
 void retpage(void * ptr);
 void user_space_init(void);
+void load_gdt(void);

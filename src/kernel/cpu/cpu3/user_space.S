@@ -2,22 +2,21 @@
 
 .global jmp2user
 jmp2user:
-    mov $0x28, %ax # user code section
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
+    # rdi = user RIP
+    # rsi = user RSP
 
+    mov user_cr3(%rip), %rax
+    mov %rax, %cr3
 
-    pushq $0x28
-    pushq %rsi
+    pushq $0x43          # USER SS
+    pushq %rsi           # USER RSP
 
     pushfq
     popq %rax
     orq $0x200, %rax
     pushq %rax
 
-    pushq $0x1b
-    pushq %rdi
+    pushq $0x3B          # USER CS
+    pushq %rdi           # USER RIP
 
     iretq

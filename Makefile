@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=gnu11 -g3 -mrdrnd -Wall -Wextra -Werror -O2 -mno-sse -I./src/kernel/include -I./src/kernel/arch
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=gnu11 -g3 -mrdrnd -Wall -Wextra -Werror -O2 -mno-sse -I./src/kernel/include -I./src/kernel/arch -mgeneral-regs-only
 # bro too many args bro
 LD := ld.lld
 

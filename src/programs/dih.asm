@@ -6,4 +6,5 @@ _entry:
 
 
 main:
-    int 0x03
+    int 0x80
+    jmp main

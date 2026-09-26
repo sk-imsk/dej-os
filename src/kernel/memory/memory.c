@@ -258,8 +258,8 @@ int virtual_memory_init(void) {
 }
 
 
-
-
+void * u_buf;
+uint64_t user_cr3;
 static address_space_t user_as;
 void user_space_init(void){
 
@@ -281,6 +281,9 @@ void user_space_init(void){
     uint64_t stack_page = __giverawpage();
     memset(phys2virt(stack_page), 0, PAGE_SIZE);
     map_page(&user_as, USER_STACK, stack_page, PAGE_PRESENT | PAGE_WRITE | PAGE_USER);
+
+    user_cr3 = user_as.pml4_phys;
+    u_buf = phys2virt(page);
 
     load_gdt();
     setupbspcpudata();

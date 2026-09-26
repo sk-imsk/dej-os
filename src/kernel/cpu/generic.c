@@ -12,6 +12,7 @@
 #include <dej/percpu.h>
 #include <dej/stdio.h>
 #include <stdatomic.h>
+#include <x86/tss.h>
 
 
 #define MSR_GS_BASE 0xC0000101
@@ -36,6 +37,9 @@ void ap_entry(struct limine_mp_info *cpu){
 
     cpu_stop_interrupts();
     InterruptInit();
+    load_gdt();
+    tss_init();
+
 
     if (percpu_size >= 4096){
         panic("percpu tables too big prob like something wrong or ill fix it later or something\n");
