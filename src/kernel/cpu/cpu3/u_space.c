@@ -4,11 +4,12 @@
  */
 #include <dej/ata.h>
 #include <dej/stdio.h>
+#include <dej/kernel.h>
 
+extern _Noreturn void jmp2user(void * rip, void * rsp);
+extern void * ucp;
 
 void enter_userspace(void){
-
-    void * buffer = (void *)(0x400000);
 
     struct file_fat32 exec = fat_open("dih.bin");
     if (exec.first_cluster < 2){
@@ -17,7 +18,8 @@ void enter_userspace(void){
 
     }
 
-    fat_read(exec, buffer);
+    fat_read(exec, ucp);
 
+    jmp2user((void *)0x400000, (void *)0x800000 + KiB(4));
 
 }

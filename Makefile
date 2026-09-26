@@ -74,6 +74,7 @@ $(IMAGE): $(KERNEL) limine.conf
 	sudo cp limine.conf $(MNT)/limine.conf
 	sudo cp $(LIMINE_DIR)/bin/limine-bios.sys $(MNT)/boot/limine/limine-bios.sys
 	sudo cp test.txt $(MNT)/test.txt
+	sudo cp src/programs/out.bin $(MNT)/dih.bin
 
 	sudo umount $(MNT)
 	sudo losetup -d $$(cat $(BUILD_DIR)/loopdev)
