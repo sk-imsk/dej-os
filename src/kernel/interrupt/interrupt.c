@@ -10,6 +10,11 @@ static bool vectors[256];       // if the vector is used or sno
 typedef struct {
     uint64_t rax, rcx, rdx, rbx, rbp, rsi, rdi;
     uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
+} __attribute__((packed)) base_regs_t;
+
+typedef struct {
+    uint64_t rax, rcx, rdx, rbx, rbp, rsi, rdi;
+    uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
 
     uint64_t ec;
     uint64_t rip;
@@ -100,8 +105,8 @@ extern void int_nmi(void);
 //in nmi.c
 
 extern void int_tss(void);
-void tss_handler(tss_regs_t frame){
-    printf("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame.ss, frame.rflags, frame.cs, frame.rip, frame.rsp, frame.error_code);
+void tss_handler(tss_regs_t * frame){
+    printf("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame->ss, frame->rflags, frame->cs, frame->rip, frame->rsp, frame->error_code);
 
     cpu_stop();
 }
@@ -125,14 +130,15 @@ void general_protection_fault_handler(gp_registers_t * frame){
 
 extern void int_page_fault(void);
 void page_fault_handler(page_fault_regs_t * frame){
-    printf("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu rsp: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags, frame->rsp, frame->ss);
+    printf("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags);
     uint64_t cr2 = get_cr2();
-    printf("cr2: %llu", cr2);
+    printf("cr2: %llu \n", cr2);
+    if (frame->cs > 0x31) printf("from userspace ss = %llu rsp = %llu", frame->ss, frame->rsp);
     serial_puts("page fault");
     cpu_stop();
 }
 
-__attribute__ ((interrupt)) void u_test(page_fault_regs_t * frame __attribute__((unused))) {
+__attribute__ ((interrupt)) void u_test(base_regs_t * frame __attribute__((unused))) {
     serial_puts("user space works lol");
 }
 

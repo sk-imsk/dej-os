@@ -93,7 +93,8 @@ global int_page_fault
 int_page_fault:
     PUSH_ALL
 
-
+    mov rdi, rsp
+    cld                             ; for sysV support
     call page_fault_handler
 
 
