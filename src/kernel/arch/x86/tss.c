@@ -1,21 +1,6 @@
 #include <dej/kernel.h>
-
-
-typedef struct {
-    uint32_t reserved0;
-    uint64_t rsp0;       // Kernel stack pointer for Ring 3 -> Ring 0 transitions
-    uint64_t rsp1;       // Unused in standard 64-bit OS
-    uint64_t rsp2;       // Unused in standard 64-bit OS
-    uint64_t reserved1;
-    uint64_t ist[7];     // IST1 to IST7 (Dedicated interrupt stacks)
-    uint64_t reserved2;
-    uint16_t reserved3;
-    uint16_t iomap_base; // Offset to I/O permission bitmap (sizeof(tss_entry) if unused)
-} __attribute__((packed)) tss_entry_t;
-
-static tss_entry_t g_tss;
-
-static uint8_t kernel_stack[16384] __attribute__((aligned(16)));
+#include <dej/percpu.h>
+#include <x86/tss.h>
 
 
 struct tss_descriptor {
@@ -29,22 +14,38 @@ struct tss_descriptor {
     uint32_t reserved;
 } __attribute__((packed));
 
+
+tss_cpu tssforcpus[32];
+
+
 extern char __tss_descriptor_ptr[];
 extern void load_tss(void);
 
 void write_tss_descriptor(void) {
+
+
+    tss_cpu * percpu_tss = (tss_cpu *)percpu_readptr(tss);
+
+
+    if (percpu_tss == NULL) {
+        serial_puts("percpu_tss = null");
+        printf("cpuid = %llu", percpu_read(cpu_id));
+        cpu_stop();
+    }
+    tss_entry_t * tss_desc = &percpu_tss->tss;
+    uint8_t * kernel_stack = percpu_tss->kernel_stack;
     // 1. Clear TSS
-    for (size_t i = 0; i < sizeof(g_tss); i++) {
-        ((uint8_t *)&g_tss)[i] = 0;
+    for (size_t i = 0; i < sizeof(*tss_desc); i++) {
+        ((uint8_t *)tss_desc)[i] = 0;
     }
 
     // 2. Point rsp0 to top of allocated kernel stack
-    g_tss.rsp0 = (uint64_t)&kernel_stack[sizeof(kernel_stack)];
-    g_tss.iomap_base = sizeof(g_tss); // Disable I/O permission bitmap
+    tss_desc->rsp0 = (uint64_t)&kernel_stack[sizeof(kernel_stack)];
+    tss_desc->iomap_base = sizeof(*tss_desc); // Disable I/O permission bitmap
 
     // 3. Populate the 16-byte TSS descriptor in the GDT
-    uint64_t base = (uint64_t)&g_tss;
-    uint32_t limit = sizeof(g_tss) - 1;
+    uint64_t base = (uint64_t)tss_desc;
+    uint32_t limit = sizeof(*tss_desc) - 1;
 
     // First 8 bytes
     uint64_t desc_low = 0;

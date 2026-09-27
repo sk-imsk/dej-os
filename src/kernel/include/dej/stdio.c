@@ -112,7 +112,7 @@ void printf_signed(long long number, int radix)
 #define PRINTF_LENGTH_LONG_LONG     4
 void printf(const char* fmt, ...)
 {
-    Assert_sil_chill();
+
     while (atomic_flag_test_and_set_explicit(&serial_lock, memory_order_acquire)) {
             // wait for lock bro
             cpu_takebreak();

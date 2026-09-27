@@ -7,4 +7,10 @@ _entry:
 
 main:
     int 0x80
-    jmp main
+
+done:
+    pause
+    pause
+    pause
+    pause
+    jmp done

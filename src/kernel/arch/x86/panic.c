@@ -58,11 +58,16 @@ _Noreturn void panic(const char * s){
     __asm__ volatile ("cli");
 
 
+
+    serial_puts("Yo panic rn everybody chill yo");
+
+    /*
     if (percpu_read(cpu_state) & 0x1) {
         while (true){
             __asm__ volatile ("hlt");
         }
     }
+    */
     // to do yo turn off all cpus
 
 
