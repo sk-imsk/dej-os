@@ -138,7 +138,7 @@ raw_page __giverawpage(){
     for (i = 0; i < pages; i++){
         if (page_list[i].used == false) break;
     }
-    if (i == pages)  panic("Raw Page requested but allocator exahusted");
+    if (i == pages)  panic("Raw Page requested but allocator exahusted");                           // because in certain times 0 can represent a raw page and the only people requeting a raw page are probably important
     page_list[i].used = true;
 
     return (uint64_t)(page_list[i].start);
