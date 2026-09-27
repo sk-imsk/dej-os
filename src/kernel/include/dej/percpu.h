@@ -4,6 +4,7 @@
 #include "../../memory/memory.h"
 #include <dej/string.h>
 #include <dej/msr.h>
+#include <x86/tss.h>
 
 
 /*
@@ -40,6 +41,18 @@ extern char __percpu_end[];
     __val; \
 })
 
+#define percpu_readptr(var)({ \
+    void * __val; \
+    uint64_t __off = percpu_offsetof(var); \
+    __asm__ volatile ( \
+        "movq %%gs:(%1), %0" \
+        : "=r"(__val) \
+        : "r"(__off) \
+        : "memory" \
+    ); \
+    __val; \
+})
+
 // Write to a 64-bit per-CPU variable
 #define percpu_write(var, val) ({ \
     uint64_t __off = percpu_offsetof(var); \
@@ -52,13 +65,15 @@ extern char __percpu_end[];
     ); \
 })
 
+#define percpu_ptr(var) \
+    ((typeof(&(var)))(cpu_percpu[cpu_id] + percpu_offsetof(var)))
+
 
 extern DEFINE_PERCPU(_Atomic uint64_t, cpu_state);
 extern DEFINE_PERCPU(uint64_t, irq);
 extern DEFINE_PERCPU(uint64_t, sil);
 extern DEFINE_PERCPU(uint64_t, cpu_id);
-
-
+extern DEFINE_PERCPU(tss_cpu *, tss);
 
 #define MAX_CPUS 64
 

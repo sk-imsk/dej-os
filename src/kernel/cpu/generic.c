@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "cpu1/temperature.h"
 #include "cpu2/health.h"
+#include "cpu3/user_space.h"
 #include "../memory/memory.h"
 #include <dej/panic.h>
 #include <dej/string.h>
@@ -11,6 +12,8 @@
 #include <dej/percpu.h>
 #include <dej/stdio.h>
 #include <stdatomic.h>
+#include <x86/tss.h>
+
 
 
 #define MSR_GS_BASE 0xC0000101
@@ -25,6 +28,9 @@ DEFINE_PERCPU(_Atomic uint64_t, cpu_state);
 DEFINE_PERCPU(uint64_t, irq);
 DEFINE_PERCPU(uint64_t, sil);
 DEFINE_PERCPU(uint64_t, cpu_id);
+DEFINE_PERCPU(tss_cpu *, tss);
+
+extern tss_cpu tssforcpus[32];
 
 
 static _Atomic uint8_t core = 0;
@@ -35,8 +41,11 @@ void ap_entry(struct limine_mp_info *cpu){
 
     cpu_stop_interrupts();
     InterruptInit();
+    load_gdt();
+
 
     if (percpu_size >= 4096){
+        printf("percpu size = %u", percpu_size);
         panic("percpu tables too big prob like something wrong or ill fix it later or something\n");
     }
 
@@ -48,10 +57,14 @@ void ap_entry(struct limine_mp_info *cpu){
 
     wrmsr(MSR_GS_BASE, (uint64_t)n_block);
 
+
     percpu_write(cpu_id, cpu->lapic_id);
+    percpu_write(tss, &tssforcpus[cpu->lapic_id]);
 
-    cpu_percpu[my_core] = (uint8_t *)n_block;
+    ;cpu_percpu[my_core] = (uint8_t *)n_block;
 
+
+    tss_init();
     cpu_enable_interrupts();
     percpu_write(sil, 0);       // enable all interrupts
 
@@ -66,6 +79,9 @@ void ap_entry(struct limine_mp_info *cpu){
             HealthMonitor();
             break;
 #endif
+        case 3:
+            enter_userspace();
+            break;
         default: cpu_stop();
     }
 

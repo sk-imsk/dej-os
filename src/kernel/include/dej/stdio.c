@@ -8,7 +8,7 @@
 
 // just kinda dumps stuff in the serial no locks or shit
 #define puts(x) serial_puts(x)
-void serial_puts(const char *s) {
+void __attribute((__no_caller_saved_registers__)) serial_puts(const char *s) {
     while (*s) {
         // 1. Wait for the hardware transmitter buffer to be empty
         // 0x3FD is the Line Status Register. Bit 5 (0x20) means "Ready to Transmit"
@@ -112,7 +112,7 @@ void printf_signed(long long number, int radix)
 #define PRINTF_LENGTH_LONG_LONG     4
 void printf(const char* fmt, ...)
 {
-    Assert_sil_chill();
+
     while (atomic_flag_test_and_set_explicit(&serial_lock, memory_order_acquire)) {
             // wait for lock bro
             cpu_takebreak();

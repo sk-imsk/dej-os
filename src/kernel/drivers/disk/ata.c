@@ -540,7 +540,7 @@ struct file_fat32 fat_open(const char * path){
  * args:
  * 1 fat file returned from fat open
  * 2  buffer to store the file
- * 3 size for size to read (of your buffer if it the file is smaller it will just stop)
+ *
  *
  */
 int fat_read(struct file_fat32  fat, void * buffer){
