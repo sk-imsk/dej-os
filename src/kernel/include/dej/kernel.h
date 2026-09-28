@@ -78,3 +78,11 @@
 #define ENOTRECOVERABLE	93	/* State not recoverable */
 #define EOWNERDEAD	94	/* Previous owner died */
 #define EPROTO		95	/* Protocol error */
+
+typedef struct {
+    _Atomic bool held;
+    int holding_cpu;
+} lock_t;
+
+void aquire_lock(lock_t * lock);
+void unlock_lock(lock_t * lock);

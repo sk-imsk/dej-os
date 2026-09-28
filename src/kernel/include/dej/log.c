@@ -5,45 +5,14 @@
 #include <dej/percpu.h>
 
 
-typedef struct {
-    _Atomic bool held;
-    int holding_cpu;
-} serial_lock_t;
 
-serial_lock_t com1_lock = {
+
+lock_t com1_lock = {
     .held = false,
     .holding_cpu = -1
 };
 
 
-static void serial_lock(void){
-    bool percpu_ready = ispercpuready();
-    int current_cpu;
-
-    if (percpu_ready){
-        current_cpu = percpu_read(cpu_id);
-    } else {
-        current_cpu = 0;
-    }
-
-    if (com1_lock.holding_cpu == current_cpu) return;               // dont waste time yo
-
-    while (atomic_exchange_explicit(&com1_lock.held, true, memory_order_acquire)){
-        cpu_takebreak();
-    }
-
-    com1_lock.holding_cpu = current_cpu;
-    com1_lock.held = true;
-
-}
-
-void serial_unlock(void) {
-
-
-    // Clear the holding tag before releasing the memory boundary
-    com1_lock.holding_cpu = -1;
-    atomic_store_explicit(&com1_lock.held, false, memory_order_release);
-}
 
 const char g_HexChars[] = "0123456789abcdef";
 static void printf_unsigned(unsigned long long number, int radix)
@@ -226,24 +195,39 @@ void vlog(const char * fmt, va_list args){
 }
 
 void LogStr(const char * s){
-    serial_lock();
+    aquire_lock(&com1_lock);
     while (*s++){
 
         if (*s == '\n') putc('\r');
         putc(*s);
     }
-    serial_unlock();
+    unlock_lock(&com1_lock);
 }
 
 void LogfStr(const char * s, ...){
-    serial_lock();
+    aquire_lock(&com1_lock);
+
     va_list args;
 
     va_start(args, s);
     vlog(s, args);
     va_end(args);
-    serial_unlock();
+
+    unlock_lock(&com1_lock);
 }
 void LogStrEarly(const char *s);
 void LogfStrEarly(const char * s, ...);
-void LogRaw(const char * s, size_t len);
+void LogRaw(void * buffer, size_t len){
+    aquire_lock(&com1_lock);
+
+    uint8_t * out = buffer;
+    uint16_t i = 0;
+    while (len){
+        putc(out[i]);
+        len--;
+        i++;
+    }
+
+    unlock_lock(&com1_lock);
+    return;
+}

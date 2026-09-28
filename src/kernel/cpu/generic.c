@@ -15,8 +15,6 @@
 #include <x86/tss.h>
 
 
-
-#define MSR_GS_BASE 0xC0000101
 /*
  *  irq is basically like which interrupt is being handled
  * sil is interrupt level to like mask stuff
@@ -69,6 +67,7 @@ void ap_entry(struct limine_mp_info *cpu){
     percpu_write(sil, 0);       // enable all interrupts
 
     LogfStr("enabling cpu %i \n", my_core);
+
     switch (my_core) {
         case 1: {
             temperature_entry();
@@ -78,10 +77,15 @@ void ap_entry(struct limine_mp_info *cpu){
         case 2:
             HealthMonitor();
             break;
-#endif
         case 3:
             enter_userspace();
             break;
+#else
+        case 2 :{
+            enter_userspace();
+            break;
+        }
+#endif
         default: cpu_stop();
     }
 

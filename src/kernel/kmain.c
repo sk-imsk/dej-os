@@ -16,6 +16,7 @@ _Noreturn void kmain(void){
     framebuffer = framebuffer_request.response->framebuffers[0];
     fb_ptr = framebuffer->address;
 
+
     uint64_t y = 0;
     while (y < framebuffer->height){
         for (uint64_t i = 0; i < framebuffer->width; i++){

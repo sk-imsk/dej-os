@@ -13,7 +13,6 @@ extern _Atomic uint64_t temperature;
 
 static int16_t health;
 _Noreturn void HealthMonitor(void){
-
     health = 0;
 
 

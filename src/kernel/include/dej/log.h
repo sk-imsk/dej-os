@@ -15,4 +15,4 @@ void LogStr(const char * s);
 void LogfStr(const char * s, ...);
 void LogStrEarly(const char *s);
 void LogfStrEarly(const char * s, ...);
-void LogRaw(const char * s, size_t len);
+void LogRaw(void * buffer, size_t len);

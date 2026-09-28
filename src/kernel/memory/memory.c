@@ -24,6 +24,10 @@ typedef struct address_space {
 static struct page page_list[10000];
 static struct limine_hhdm_response * hhdm;
 
+static lock_t memory_lock = {
+    .held = false,
+    .holding_cpu = -1
+};
 
 extern void load_gdt(void);
 
@@ -120,6 +124,7 @@ static inline always_inline void * phys2virt(raw_page addr){
 
 // returns pointer to 4 Kib page
 void * KGetPage(){
+    aquire_lock(&memory_lock);
 
     uint32_t i;
     for (i = 0; i < pages; i++){
@@ -128,12 +133,16 @@ void * KGetPage(){
     if (i == pages) return NULL;
     page_list[i].used = true;
 
+
+    unlock_lock(&memory_lock);
     return (void *)(page_list[i].start + hhdm->offset);
 }
 
 // tuffer lowk cuz you dont have to return it
 // but also like only 1 guy is gonna use it ever so lowk nah
 raw_page __giverawpage(){
+    aquire_lock(&memory_lock);
+
     uint32_t i;
     for (i = 0; i < pages; i++){
         if (page_list[i].used == false) break;
@@ -141,6 +150,7 @@ raw_page __giverawpage(){
     if (i == pages)  panic("Raw Page requested but allocator exahusted");                           // because in certain times 0 can represent a raw page and the only people requeting a raw page are probably important
     page_list[i].used = true;
 
+    unlock_lock(&memory_lock);
     return (uint64_t)(page_list[i].start);
 }
 
