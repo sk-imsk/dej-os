@@ -10,10 +10,11 @@
 #define MSR_IA32_FEATURE_CONTROL          0x3A
 #define MSR_IA32_MCG_STATUS                    0x17F
 #define MSR_IA32_TIME_STAMP_COUNTER  0x10
-#define MSR_IA32_PERF_STATUS                    0x198
-#define MSR_IA32_THERM_STATUS                0x19C
-#define MSR_IA32_STAR                                   0xC0000104
-
+#define MSR_IA32_PERF_STATUS                   0x198
+#define MSR_IA32_THERM_STATUS               0x19C
+#define MSR_IA32_STAR                                  0xC0000104
+#define MSR_LSTAR                                           0xC0000082
+#define MSR_FMASK                                          0xC0000084
 
 
 static inline uint64_t rdmsr(uint32_t msr)
