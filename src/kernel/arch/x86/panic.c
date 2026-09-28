@@ -1,4 +1,4 @@
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -16,10 +16,9 @@ struct stack_frame{
 // prints or something
 // uses frame pointer beacuse im not a nerd
 void stack_unwind(void){
-    serial_puts("\nStack trace\n");
+    LogStr("\nStack trace\n");
 
     struct stack_frame * f;
-    char buffer[19];
 
     __asm__ volatile ("movq %%rbp, %0": "=r" (f));
 
@@ -28,9 +27,7 @@ void stack_unwind(void){
 
         if (f->ret == NULL) break;
 
-        uint64_to_hex((uint64_t)f->ret, buffer);
-        serial_puts(buffer);
-        serial_puts("\r");
+        LogfStr("%llu \r", f->ret);
 
         f = f->next;
         count++;
@@ -59,7 +56,7 @@ _Noreturn void panic(const char * s){
 
 
 
-    serial_puts("Yo panic rn everybody chill yo");
+    LogStr("Yo panic rn everybody chill yo");
 
     /*
     if (percpu_read(cpu_state) & 0x1) {
@@ -71,7 +68,7 @@ _Noreturn void panic(const char * s){
     // to do yo turn off all cpus
 
 
-    printf("\nPanic: %s \n", s);
+    LogfStr("\nPanic: %s \n", s);
 
 
 
@@ -82,6 +79,6 @@ _Noreturn void panic(const char * s){
 
 
 _Noreturn void fi_panic(const char * cooked){ // like panic but were basically cooked instantly so dont bother with anything fancy
-    serial_puts(cooked); // we cooked gng
+    LogStr(cooked); // we cooked gng
     triple_fault();
 }

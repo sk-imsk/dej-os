@@ -19,3 +19,12 @@ void setupbspcpudata(){
     cpu_enable_interrupts();
     percpu_write(sil, 0);
 }
+bool ispercpuready(void){
+    unsigned int low, high;
+
+        // Safely read the 64-bit GS Base MSR without hitting memory or segments
+        __asm__ volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(MSR_GS_BASE));
+
+        // If both low and high dwords are 0, GS base is empty/uninitialized
+        return (low != 0) || (high != 0);
+}

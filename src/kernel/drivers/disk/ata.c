@@ -2,7 +2,7 @@
 #include "ata.h"
 #include <dej/string.h>
 #include <x86/x86.h>
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include "../memory/memory.h"
 #include <dej/sil.h>
 
@@ -400,20 +400,17 @@ int ata_init(void){
     if (strncmp((char *)buf.gpt_header.sig, "EFI PART", 8) != 0) return 0; // cmp efi partition casting sig into a char *
 
 
-    printf("Found gpt header\n");
-
     gpt_hp part_buf;
     if (ata_read_sector(buf.gpt_header.part_entry_lba, part_buf.raw) != 0) {
-        printf("Failed to read lba %lu ", buf.gpt_header.part_entry_lba);
+        LogfStr("Failed to read lba %lu ", buf.gpt_header.part_entry_lba);
         return -1;
     }
 
     vol_start_lba = part_buf.gpt_p.part2.f_lba;         // explicitly use partition 2 for my disk layout
-    serial_puts("Found start of fat\n");
 
     fat_bpb bpb;
     if (ata_read_sector(vol_start_lba, bpb.raw) != 0){
-        serial_puts("File read failed");
+        LogStr("File read failed");
         return -1;
     }
 
@@ -429,7 +426,7 @@ int ata_init(void){
 
 
 timeout:
-    serial_puts("Time out.");
+    LogStr("Time out.");
     return 100;
 }
 
@@ -497,7 +494,7 @@ static int findfat_file(const char * fname, struct direntry *out, uint32_t dir_c
 
 NotFound:
     retpage(cluster);
-    printf("file %s not found returning null\n", fname);
+    LogfStr("file %s not found returning null\n", fname);
     return -1;
 
 
@@ -515,10 +512,10 @@ struct file_fat32 fat_open(const char * path){
 
 
     while (next_path_component(&path, component, sizeof(component))) {
-        printf("component: %s \n", component);
+        LogfStr("component: %s \n", component);
 
          if (findfat_file(component, &dirent, HL_CLUSTER) != 0){
-             printf("Failed to read disk at %ul \n", HL_CLUSTER);
+             LogfStr("Failed to read disk at %ul \n", HL_CLUSTER);
              return ret;
          }
 

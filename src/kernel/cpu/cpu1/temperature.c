@@ -1,7 +1,7 @@
 #include <limine.h>
 #include <stdatomic.h>
 #include <stdbool.h>
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include <dej/random.h>
 #include <dej/cpu.h>
 #include <dej/percpu.h>
@@ -12,13 +12,13 @@ volatile uint64_t ap_started = 0;
 void temperature_entry(void)
 {
     uint64_t random;
-    printf("cpu %i is ready to read the temperature\n", percpu_read(cpu_id));
+    LogfStr("cpu %i is ready to read the temperature\n", percpu_read(cpu_id));
 
     for (;;){
         if (rdrand(&random)) {
             atomic_store(&temperature, random % 131);
         } else {
-            printf("rdrand failed stopping high tech temperature sensor tech");
+            LogfStr("rdrand failed stopping high tech temperature sensor tech");
             cpu_stop();
         }
 

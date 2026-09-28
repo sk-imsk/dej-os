@@ -17,17 +17,17 @@ _Noreturn void HealthMonitor(void){
     health = 0;
 
 
-    printf("Health monitor waiting for the nerds\n");
+    LogStr("Health monitor waiting for the nerds\n");
     while (!((uint64_t)(*cpu_percpu[1]) & 0x01)) cpu_takebreak();        // we need temperature CPU to be on to check system health
-    printf("Starting health monitoring\n");
+    LogStr("Starting health monitoring\n");
 
     while (true){
         if (atomic_load(&temperature) > 90) {
-            printf("High temperature temperature is at %i\n", atomic_load(&temperature) );
+            LogfStr("High temperature temperature is at %i\n", atomic_load(&temperature) );
             health -= 10;
         }
         else if (atomic_load(&temperature) < 20) {
-            printf("bit chilly eh temperature is at %llu\n", atomic_load(&temperature));
+            LogfStr("bit chilly eh temperature is at %llu\n", atomic_load(&temperature));
             health -= 10;
         }
 
@@ -43,7 +43,7 @@ _Noreturn void HealthMonitor(void){
 
         for (uint32_t i = 0; i < 1000000; i++) cpu_takebreak();
 
-        printf("health score is at %d \n", health);
+        LogfStr("health score is at %d \n", health);
 
 
     }

@@ -84,3 +84,4 @@ extern uint8_t *cpu_percpu[MAX_CPUS];       // pointer to all cpus data or somet
 
 
 void setupbspcpudata();
+bool ispercpuready(void);

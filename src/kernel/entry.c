@@ -1,6 +1,6 @@
 // the kernel ig
 #include <x86/x86.h>
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include "interrupt/interrupt.h"
 #include "memory/memory.h"
 #include <dej/string.h>
@@ -67,7 +67,9 @@ void serial_init(void)
 }
 
 void kentry(void) {
-    if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");
+    if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");                          //
+
+
     atomic_store(&kentry_ran, true);
 
 
@@ -108,7 +110,7 @@ void kentry(void) {
 
 
 
-    printf("framebuffer %lux%lu pitch=%lu bpp=%u\n",framebuffer_request.response->framebuffers[0]->height,
+    LogfStr("framebuffer %lux%lu pitch=%lu bpp=%u\n",framebuffer_request.response->framebuffers[0]->height,
         framebuffer_request.response->framebuffers[0]->width,
         framebuffer_request.response->framebuffers[0]->pitch,
         framebuffer_request.response->framebuffers[0]->bpp);
@@ -128,7 +130,7 @@ void kentry(void) {
                 ap_entry,
                 __ATOMIC_RELEASE
             );
-            printf("sending cpu %i to ap entry\n", i);
+            LogfStr("sending cpu %i to ap entry\n", i);
         }
     }
 

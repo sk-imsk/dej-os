@@ -97,7 +97,7 @@ void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
 
 extern void int_divide_by_0(void);
 void divide_by_0_handler(void){
-    serial_puts("Division by 0 occured");
+    LogStr("Division by 0 occured");
     cpu_stop();
 }
 
@@ -106,14 +106,14 @@ extern void int_nmi(void);
 
 extern void int_tss(void);
 void tss_handler(tss_regs_t * frame){
-    printf("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame->ss, frame->rflags, frame->cs, frame->rip, frame->rsp, frame->error_code);
+    LogfStr("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame->ss, frame->rflags, frame->cs, frame->rip, frame->rsp, frame->error_code);
 
     cpu_stop();
 }
 
 extern void int_general_protection_fault(void);
 void general_protection_fault_handler(gp_registers_t * frame){
-    printf(
+    LogfStr(
         "GP: ec=%lx rip=%lx cs=%lx rflags=%lx rsp=%lx ss=%lx\n",
         frame->ec,
         frame->rip,
@@ -122,7 +122,7 @@ void general_protection_fault_handler(gp_registers_t * frame){
         frame->rsp,
         frame->ss
     );
-    printf("cpu: %lu", percpu_read(cpu_id));
+    LogfStr("cpu: %lu", percpu_read(cpu_id));
 
     cpu_stop();
 }
@@ -130,16 +130,16 @@ void general_protection_fault_handler(gp_registers_t * frame){
 
 extern void int_page_fault(void);
 void page_fault_handler(page_fault_regs_t * frame){
-    printf("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags);
+    LogfStr("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags);
     uint64_t cr2 = get_cr2();
-    printf("cr2: %llu \n", cr2);
-    if (frame->cs > 0x31) printf("from userspace ss = %llu rsp = %llu", frame->ss, frame->rsp);
-    serial_puts("page fault");
+    LogfStr("cr2: %llu \n", cr2);
+    if (frame->cs > 0x31) LogfStr("from userspace ss = %llu rsp = %llu", frame->ss, frame->rsp);
+    LogStr("page fault");
     cpu_stop();
 }
 
 __attribute__ ((interrupt)) void u_test(base_regs_t * frame __attribute__((unused))) {
-    serial_puts("user space works lol");
+    __asm__ volatile ("nop");
 }
 
 
@@ -181,13 +181,13 @@ void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name)
 
 
     if (vectors[vector] == true){
-        printf("vector %u used crashing", vector);
+        LogfStr("vector %u used attemped to be registered by %s", vector, name);
         panic("Vector in use ");
     }
 
     idt_set_gate(vector, handler, 0xEE);
 
-    printf("Interrupt vector %u registered succesfully to %s", vector, name);
+    LogfStr("Interrupt vector %u registered succesfully to %s", vector, name);
 
     return;
 }

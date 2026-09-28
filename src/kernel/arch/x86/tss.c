@@ -28,8 +28,8 @@ void write_tss_descriptor(void) {
 
 
     if (percpu_tss == NULL) {
-        serial_puts("percpu_tss = null");
-        printf("cpuid = %llu", percpu_read(cpu_id));
+        LogStr("percpu_tss = null");
+        LogfStr("cpuid = %llu", percpu_read(cpu_id));
         cpu_stop();
     }
     tss_entry_t * tss_desc = &percpu_tss->tss;

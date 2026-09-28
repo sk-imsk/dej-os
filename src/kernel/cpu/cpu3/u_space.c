@@ -3,7 +3,7 @@
  *
  */
 #include <dej/ata.h>
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include <dej/kernel.h>
 
 extern _Noreturn void jmp2user(void * rip, void * rsp);
@@ -14,7 +14,7 @@ void enter_userspace(void){
     void * buf = (void *)(u_buf);
     struct file_fat32 exec = fat_open("dih.bin");
     if (exec.first_cluster < 2){
-        printf("opening dih.bin failed ");
+        LogStr("opening dih.bin failed ");
         return;
 
     }

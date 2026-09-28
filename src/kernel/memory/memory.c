@@ -63,8 +63,8 @@ int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_respo
                 // basically i aint gonna use yet but later sure
                 break;
             case LIMINE_MEMMAP_BAD_MEMORY:
-                printf("Bad memory at %llu ", memmap->entries[i]->base);
-                printf("Length %llu \r\n", memmap->entries[i]->length);
+                LogfStr("Bad memory at %llu \n", memmap->entries[i]->base);
+                LogfStr("Length %llu \r\n", memmap->entries[i]->length);
                 break;
             case LIMINE_MEMMAP_ACPI_NVS:
                 break;

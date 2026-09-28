@@ -1,4 +1,4 @@
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include <dej/cpu.h>
 #include <dej/msr.h>
 #include <dej/panic.h>
@@ -66,24 +66,17 @@ static uint8_t check_severity(){
 extern _Atomic uint64_t temperature;
 extern void int_nmi(void);
 void nmi_handler(nmi_registers_t * regs){
-    char msg[19];
-    char msg2[19];
 
-    uint64_t crash_addr = regs->rip;
-    uint64_t crash_rax = regs->rax;
-    uint64_to_hex(crash_addr, msg);
-    uint64_to_hex(crash_rax, msg2);
-
-    printf("NMI address = %p RAX = %p \n\n",msg , msg2);
+    LogfStr("NMI address = %p RAX = %p \n\n",regs->rip , regs->rax);
 
     uint64_t res = check_severity();
     if (res == 0) return; // we good yo
     if (res == 1 && !(is_bsp())){
-        serial_puts("\n NMI on temperature thread killing core");
+        LogStr("\n NMI on non bsp core killing it \n");
         atomic_exchange(&temperature, 999999);
-        res = rdmsr(0x17A);
+        res = rdmsr(MSR_IA32_MCG_STATUS);
         res &= ~(1ULL << 2);
-        wrmsr(0x17A, res);
+        wrmsr(MSR_IA32_MCG_STATUS, res);
 
         cpu_stop();
     }
@@ -92,24 +85,19 @@ void nmi_handler(nmi_registers_t * regs){
     //
     uint32_t num_banks = rdmsr(0x179) & 0xFF;
 
-    serial_puts("--- MCA BANK LOGS ---\n");
+    LogStr("--- MCA BANK LOGS ---\n");
         for (uint32_t i = 0; i < num_banks; i++) {
             uint64_t bank_status = rdmsr(0x401 + (i * 4)); // MCx_STATUS
 
             // If Bit 63 (Valid) is set, this bank has our crime scene data
             if (bank_status & (1ULL << 63)) {
-                serial_puts("Bank ");
-                uint64_to_hex(i, msg); serial_puts(msg);
-                serial_puts(" STATUS = ");
-                uint64_to_hex(bank_status, msg); serial_puts(msg);
-                serial_puts("\n");
+                LogfStr("Bank %i :", i);
+                LogfStr(" STATUS = %llu \n", bank_status);
 
                 // Bit 59: Address Valid (ADDRV) -> If set, fetch the physical address
                 if (bank_status & (1ULL << 59)) {
                     uint64_t bank_addr = rdmsr(0x402 + (i * 4)); // MCx_ADDR
-                    serial_puts("  PHYS ADDR = ");
-                    uint64_to_hex(bank_addr, msg); serial_puts(msg);
-                    serial_puts("\n");
+                    LogfStr("  PHYS ADDR = %llu \n", bank_addr);
                 }
             }
         }
