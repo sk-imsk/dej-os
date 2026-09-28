@@ -90,12 +90,13 @@ always:
 	mkdir -p build/interrupt
 	mkdir -p build/memory
 	mkdir -p build/x86/
-	mkdir -p build/cpu/cpu1/
+	mkdir -p build/sys/cpu/cpu1/
 	mkdir -p build/drivers/disk
 	mkdir -p build/drivers/framebuffer
 	mkdir -p build/include/dej
-	mkdir -p build/cpu/cpu2
-	mkdir -p build/cpu/cpu3
+	mkdir -p build/sys/cpu/cpu2
+	mkdir -p build/sys/cpu/cpu3
+	mkdir -p build/sys/acpi
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

@@ -18,30 +18,36 @@ extern void ap_entry(struct limine_mp_info *cpu);
 __attribute__((section(".temperature")))
 _Atomic uint64_t temperature;
 
+#define limine_request __attribute__((used, section(".limine_requests")))
 
 // limine stuff (6 is latest revision)
-__attribute__((used, section(".limine_requests")))
+limine_request
 volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
 
-__attribute__((used, section(".limine_requests")))
+limine_request
 volatile struct limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
     .revision = 0
 };
 
-__attribute__((used, section(".limine_requests")))
+limine_request
 volatile struct limine_memmap_request memmap_request = {
     .id = LIMINE_MEMMAP_REQUEST_ID,
     .revision = 0
 };
-__attribute__((used, section(".limine_requests")))
+limine_request
 volatile struct limine_hhdm_request hhdm_request = {
     .id = LIMINE_HHDM_REQUEST_ID,
     .revision = 0
 };
-__attribute__((used, section(".limine_requests")))
+limine_request
 volatile struct limine_mp_request mp_request = {
     .id = LIMINE_MP_REQUEST_ID,
+    .revision = 0
+};
+limine_request
+volatile struct limine_rsdp_request rsdp_request = {
+    .id = LIMINE_RSDP_REQUEST_ID,
     .revision = 0
 };
 
