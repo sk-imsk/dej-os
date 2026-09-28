@@ -7,8 +7,7 @@
 struct limine_framebuffer *framebuffer;
 volatile uint32_t *fb_ptr;
 
-#define WHITE 0xFFFFFF
-#define BLUE 0xAA
+
 
 
 _Noreturn void kmain(void){
@@ -20,11 +19,11 @@ _Noreturn void kmain(void){
     uint64_t y = 0;
     while (y < framebuffer->height){
         for (uint64_t i = 0; i < framebuffer->width; i++){
-            putpixel(i, y, WHITE);
+            putpixel(i, y, 0x676767);
         }
         y++;
         for (uint64_t i = 0; i < framebuffer->width; i++){
-            putpixel(i, y, BLUE);
+            putpixel(i, y, 0xFF00FF);
         }
         y++;
     }
