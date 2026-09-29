@@ -1,0 +1,12 @@
+megs: 256
+
+cpu: count=1, ips=10000000, reset_on_triple_fault=0
+
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest.bin
+
+# Attach as hard drive
+ata0-master: type=disk, path="build/dej-os.img", mode=flat
+boot: disk
+
+log: bochslog.txt

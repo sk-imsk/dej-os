@@ -76,6 +76,10 @@ $(IMAGE): $(KERNEL) limine.conf
 	sudo cp test.txt $(MNT)/test.txt
 	sudo cp src/programs/out.bin $(MNT)/dih.bin
 
+
+	sudo mkdir -p $(MNT)/EFI/BOOT
+	sudo cp $(LIMINE_DIR)/bin/BOOTX64.EFI $(MNT)/EFI/BOOT/BOOTX64.EFI
+
 	sudo umount $(MNT)
 	sudo losetup -d $$(cat $(BUILD_DIR)/loopdev)
 	rm -f $(BUILD_DIR)/loopdev
