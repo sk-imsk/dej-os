@@ -67,33 +67,33 @@ void serial_init(void)
 }
 
 void kentry(void) {
-    if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice");                          //
+    if (atomic_exchange(&kentry_ran, true)) panic("kentry ran twice", STATUS_UNKNOWN);                          //
 
 
 
     // Ensure the bootloader actually gets us
     if (unlikely(LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false)) {
-        panic("Bootloader doesnt support our revision");
+        panic("Bootloader doesnt support our revision", STATUS_UNKNOWN);
     }
 
     // Ensure we got a framebuffer.
     if (unlikely(framebuffer_request.response == NULL
      || framebuffer_request.response->framebuffer_count < 1)) {
-         panic("Didnt recieve a framebuffer");
+         panic("Didnt recieve a framebuffer", STATUS_UNKNOWN);
     }
 
     // make sure we got a memmap
     if (unlikely(memmap_request.response == NULL || memmap_request.response->entry_count < 1)) {
-        panic("Didnt recieve a memmap");
+        panic("Didnt recieve a memmap", STATUS_UNKNOWN);
     }
 
     // make sure we got hhdm or something
     if (unlikely(hhdm_request.response == NULL)){
-        panic("Didnt recieve a hhdm");
+        panic("Didnt recieve a hhdm", STATUS_UNKNOWN);
     }
     // make sure we got a mp thing
     if (unlikely(mp_request.response == NULL)){
-        panic("Didnt recieve a mp");
+        panic("Didnt recieve a mp", STATUS_UNKNOWN);
     }
 
 

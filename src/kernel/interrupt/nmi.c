@@ -132,16 +132,16 @@ void nmi_handler(nmi_registers_t * regs){
             : "al"
         );
 
-         panic("Watchdog expired");
+         panic("Watchdog expired", STATUS_LOCKUP);
 
     }
 
     res = x86_inb(0x61);
     switch (res){
         case 6:
-            panic("Bus Error (from legacy port)");
+            panic("Bus Error (from legacy port)", STATUS_HARDWARE_FAILURE);
         case 7:
-            panic("Memory failure (from legacy port)");
+            panic("Memory failure (from legacy port)", STATUS_HARDWARE_FAILURE);
     }
 
 

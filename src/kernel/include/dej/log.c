@@ -201,7 +201,7 @@ void LogStr(const char * s){
         if (*s == '\n') putc('\r');
         putc(*s);
     }
-    unlock_lock(&com1_lock);
+    release_lock(&com1_lock);
 }
 
 void LogfStr(const char * s, ...){
@@ -213,7 +213,7 @@ void LogfStr(const char * s, ...){
     vlog(s, args);
     va_end(args);
 
-    unlock_lock(&com1_lock);
+    release_lock(&com1_lock);
 }
 void LogStrEarly(const char *s);
 void LogfStrEarly(const char * s, ...);
@@ -228,6 +228,6 @@ void LogRaw(void * buffer, size_t len){
         i++;
     }
 
-    unlock_lock(&com1_lock);
+    release_lock(&com1_lock);
     return;
 }

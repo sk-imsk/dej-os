@@ -22,7 +22,7 @@ void aquire_lock(lock_t * lock){
 
 }
 
-void unlock_lock(lock_t * lock) {
+void release_lock(lock_t * lock) {
 
 
     // Clear the holding tag before releasing the memory boundary
