@@ -5,6 +5,9 @@
 #include <stdbool.h>
 #include <dej/cpu.h>
 #include <dej/percpu.h>
+#include <dej/framebuffer.h>
+#include <dej/panic.h>
+
 
 
 struct stack_frame{
@@ -12,6 +15,18 @@ struct stack_frame{
     void * ret;
 };
 
+void draw_screen(void){
+    struct limine_framebuffer * f = RequestFrameBuffer(0);
+    uint64_t y = 0;
+    while (y < f->height){
+        for (uint64_t i = 0; i < f->width; i++){
+            putpixel(i, y, 0x0000FF);                   // tuff blue
+        }
+        y++;
+    }
+
+
+}
 
 // prints or something
 // uses frame pointer beacuse im not a nerd
@@ -41,7 +56,7 @@ _Noreturn static void triple_fault(void) {
 
     __asm__ volatile("lidt (%0)" : : "r"(idt_ptr));
 
-    // trigger a interupt and make the le computer die or something
+    // if the cpu is retarded and doesnt reject the idt then tell it to handle a interrupt
     __asm__ volatile("int $3");
 
     for (;;)
@@ -51,25 +66,29 @@ _Noreturn static void triple_fault(void) {
 }
 
 
-_Noreturn void panic(const char * s){
-    __asm__ volatile ("cli");
+_Noreturn void panic(const char * s, status code){
+    cpu_stop_interrupts();
 
 
 
     LogStr("Yo panic rn everybody chill yo");
 
-    /*
-    if (percpu_read(cpu_state) & 0x1) {
-        while (true){
-            __asm__ volatile ("hlt");
+    if (ispercpuready()){
+        if (percpu_read(cpu_state) &  0x1) {
+            while (true){
+                __asm__ volatile ("hlt");
+            }
         }
     }
-    */
+
+
     // to do yo turn off all cpus
 
 
-    LogfStr("\nPanic: %s \n", s);
+    LogfStr("\nPanic: %s code %u", s, code);
 
+
+    draw_screen();
 
 
     // stack_unwind();

@@ -20,7 +20,7 @@ ksil RaiseSil(ksil new){
 
     ksil old = (ksil)__readcr8();
 
-    if (old > new) panic("Tried to lower sil using RaiseSil");
+    if (old > new) panic("Tried to lower sil using RaiseSil", STATUS_INVALID_SIL);
 
     __writecr8(new);
 
@@ -32,7 +32,7 @@ ksil RaiseSil(ksil new){
 void LowerSil(ksil new){
     ksil old = (ksil)__readcr8();
 
-    if (old < new) panic("attempted to raise sil using LowerSil");
+    if (old < new) panic("attempted to raise sil using LowerSil", STATUS_INVALID_SIL);
 
     __writecr8(new);
 

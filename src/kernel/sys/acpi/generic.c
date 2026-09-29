@@ -47,6 +47,8 @@ static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
 
 
 
+
+
 }
 
 static void parse_acpi_earlyboot_rev2(struct XSDP_t * rsdp __unused){

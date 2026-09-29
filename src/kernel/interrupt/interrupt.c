@@ -1,9 +1,14 @@
 #include <stdint.h>
 #include <dej/cpu.h>
 #include <x86/x86.h>
-#include <dej/stdio.h>
+#include <dej/log.h>
 #include <dej/panic.h>
 #include <dej/percpu.h>
+
+lock_t iv_lock = {
+    .held = false,
+    .holding_cpu = -1
+};
 
 static bool vectors[256];       // if the vector is used or sno
 
@@ -80,6 +85,7 @@ static inline always_inline uint64_t get_cr2(void)
 
 void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
 {
+
     uint64_t addr = (uint64_t)handler;
 
     idt[vector].offset_1 = addr & 0xFFFF;
@@ -91,6 +97,7 @@ void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
     idt[vector].zero = 0;
 
     vectors[vector] = true;
+
 }
 
 
@@ -152,7 +159,6 @@ void InterruptInit(void){
     idt_set_gate(10, int_tss, 0x8E);
     idt_set_gate(13, int_general_protection_fault, 0x8E);
     idt_set_gate(14, int_page_fault, 0x8E);// will add more later
-    idt_set_gate(0x80, u_test, 0xEE);
 
 
     struct IDTR idtr = {
@@ -175,19 +181,23 @@ void InterruptInit(void){
  *
  */
 void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name){
+    aquire_lock(&iv_lock);
+
     if (vector <= 64) {
-        panic("Attempted register reserved interrupt vector");
+        panic("Attempted register reserved interrupt vector", STATUS_UNKNOWN);
     }
 
 
     if (vectors[vector] == true){
         LogfStr("vector %u used attemped to be registered by %s", vector, name);
-        panic("Vector in use ");
+        panic("Vector in use ", STATUS_TAKEN);
     }
 
     idt_set_gate(vector, handler, 0xEE);
 
-    LogfStr("Interrupt vector %u registered succesfully to %s", vector, name);
+    LogfStr("Interrupt vector %u registered succesfully to \" %s  \"\n", vector, name);
+
+    release_lock(&iv_lock);
 
     return;
 }

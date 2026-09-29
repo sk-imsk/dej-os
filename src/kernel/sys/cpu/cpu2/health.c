@@ -1,7 +1,6 @@
 #include <dej/kernel.h>
 #include <dej/cpu.h>
 #include <dej/percpu.h>
-#include <dej/stdio.h>
 #include <dej/panic.h>
 
 extern _Atomic uint64_t temperature;
@@ -37,7 +36,7 @@ _Noreturn void HealthMonitor(void){
         cpu_takebreak();
 
         if (health <= -50) {
-            panic("Doctor needed computer health dropped to extremly low levels \n");
+            panic("Doctor needed computer health dropped to extremly low levels \n", STATUS_UNKNOWN);
         }
 
         for (uint32_t i = 0; i < 1000000; i++) cpu_takebreak();
