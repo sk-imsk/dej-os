@@ -20,12 +20,9 @@ _Noreturn void kmain(void){
 
     uint64_t y = 0;
     while (y < framebuffer->height){
+
         for (uint64_t i = 0; i < framebuffer->width; i++){
             putpixel(i, y, 0x676767);
-        }
-        y++;
-        for (uint64_t i = 0; i < framebuffer->width; i++){
-            putpixel(i, y, 0xFF00FF);
         }
         y++;
     }
@@ -33,7 +30,6 @@ _Noreturn void kmain(void){
     cpu_takebreak();
     y = 0;
 
-    panic("too much dih detected", STATUS_UNKNOWN);
 
 
 

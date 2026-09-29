@@ -5,6 +5,11 @@
 #include <dej/panic.h>
 #include <dej/percpu.h>
 
+lock_t iv_lock = {
+    .held = false,
+    .holding_cpu = -1
+};
+
 static bool vectors[256];       // if the vector is used or sno
 
 typedef struct {
@@ -80,6 +85,7 @@ static inline always_inline uint64_t get_cr2(void)
 
 void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
 {
+
     uint64_t addr = (uint64_t)handler;
 
     idt[vector].offset_1 = addr & 0xFFFF;
@@ -91,6 +97,7 @@ void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
     idt[vector].zero = 0;
 
     vectors[vector] = true;
+
 }
 
 
@@ -174,6 +181,8 @@ void InterruptInit(void){
  *
  */
 void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name){
+    aquire_lock(&iv_lock);
+
     if (vector <= 64) {
         panic("Attempted register reserved interrupt vector", STATUS_UNKNOWN);
     }
@@ -187,6 +196,8 @@ void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name)
     idt_set_gate(vector, handler, 0xEE);
 
     LogfStr("Interrupt vector %u registered succesfully to \" %s  \"\n", vector, name);
+
+    release_lock(&iv_lock);
 
     return;
 }

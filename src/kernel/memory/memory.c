@@ -133,7 +133,7 @@ void * KGetPage(){
     page_list[i].used = true;
 
 
-    unlock_lock(&memory_lock);
+    release_lock(&memory_lock);
     return (void *)(page_list[i].start + hhdm->offset);
 }
 
@@ -149,7 +149,7 @@ raw_page __giverawpage(){
     if (i == pages)  panic("Raw Page requested but allocator exahusted", STATUS_NOMEM);                           // because in certain times 0 can represent a raw page and the only people requeting a raw page are probably important
     page_list[i].used = true;
 
-    unlock_lock(&memory_lock);
+    release_lock(&memory_lock);
     return (uint64_t)(page_list[i].start);
 }
 

@@ -87,4 +87,4 @@ typedef struct {
 } lock_t;
 
 void aquire_lock(lock_t * lock);
-void unlock_lock(lock_t * lock);
+void release_lock(lock_t * lock);
