@@ -22,10 +22,10 @@ void LowerSil(ksil new);
 
 
 #define Assert_sil_less_than_or_equal(x)         \
-    if (x <= percpu_read(sil)) panic("sil not less or equal");
+    if (x <= percpu_read(sil)) panic("sil not less or equal", STATUS_INVALID_SIL);
 
 #define Assert_sil_more_than(x) \
-    if (x > percpu_read(sil)) panic("sil too small ffor operation");
+    if (x > percpu_read(sil)) panic("sil too small ffor operation", STATUS_INVALID_SIL);
 
 #define Assert_sil_chill()         \
-    if (0 != percpu_read(sil)) panic("sil not less or equal");
+    if (0 != percpu_read(sil)) panic("sil not less or equal", STATUS_INVALID_SIL);

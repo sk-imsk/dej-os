@@ -2,6 +2,7 @@
 #include <dej/cpu.h>
 #include <dej/limine.h>
 #include <dej/framebuffer.h>
+#include <dej/panic.h>
 
 
 struct limine_framebuffer *framebuffer;
@@ -31,6 +32,8 @@ _Noreturn void kmain(void){
 
     cpu_takebreak();
     y = 0;
+
+    panic("too much dih detected", STATUS_UNKNOWN);
 
 
 

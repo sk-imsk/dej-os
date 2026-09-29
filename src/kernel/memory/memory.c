@@ -1,4 +1,3 @@
-#include <dej/stdio.h>
 #include <dej/panic.h>
 #include <dej/kernel.h>
 #include <dej/string.h>
@@ -147,7 +146,7 @@ raw_page __giverawpage(){
     for (i = 0; i < pages; i++){
         if (page_list[i].used == false) break;
     }
-    if (i == pages)  panic("Raw Page requested but allocator exahusted");                           // because in certain times 0 can represent a raw page and the only people requeting a raw page are probably important
+    if (i == pages)  panic("Raw Page requested but allocator exahusted", STATUS_NOMEM);                           // because in certain times 0 can represent a raw page and the only people requeting a raw page are probably important
     page_list[i].used = true;
 
     unlock_lock(&memory_lock);
@@ -227,13 +226,13 @@ void retpage(void * ptr){
                 return;
             }
             else {
-                panic("Attemped deallocation of unused page");
+                panic("Attemped deallocation of unused page", STATUS_UNKNOWN);
             }
        }
 
 
    }
-   panic("Attempted deallocation of nonexistent page");
+   panic("Attempted deallocation of nonexistent page", STATUS_UNKNOWN);
 }
 
 

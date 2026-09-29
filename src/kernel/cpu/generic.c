@@ -44,7 +44,7 @@ void ap_entry(struct limine_mp_info *cpu){
 
     if (percpu_size >= 4096){
         LogfStr("percpu size = %u", percpu_size);
-        panic("percpu tables too big prob like something wrong or ill fix it later or something\n");
+        panic("percpu tables too big prob like something wrong or ill fix it later or something\n", STATUS_UNKNOWN);                // todo replace with recovery or something
     }
 
     char * n_block = KGetPage();
