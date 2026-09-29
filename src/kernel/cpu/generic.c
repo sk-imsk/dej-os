@@ -73,6 +73,7 @@ void ap_entry(struct limine_mp_info *cpu){
             temperature_entry();
             break;
         }
+#ifdef __RC__
 #ifdef __HEALTH
         case 2:
             HealthMonitor();
@@ -85,6 +86,7 @@ void ap_entry(struct limine_mp_info *cpu){
             enter_userspace();
             break;
         }
+#endif
 #endif
         default: cpu_stop();
     }

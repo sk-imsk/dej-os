@@ -103,7 +103,7 @@ void kentry(void) {
     memory_init(memmap_request.response, hhdm_request.response);
     virtual_memory_init();
     user_space_init();
-    ata_init();
+    // ata_init();                                          disabled while trying to boot on a real computer
     check_watchdog();
 
 
