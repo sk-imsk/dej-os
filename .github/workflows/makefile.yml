@@ -27,7 +27,7 @@ jobs:
       run: |
         cd limine
           ./bootstrap
-          ./configure --enable-bios
+          ./configure --enable-bios --enable-uefi-x86-64
           make
     - name: Run check
       run: |
