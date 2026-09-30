@@ -10,3 +10,4 @@ ata0-master: type=disk, path="build/dej-os.img", mode=flat
 boot: disk
 
 log: bochslog.txt
+com1: enabled=1, mode=file, dev=com1.out

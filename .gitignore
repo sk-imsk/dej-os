@@ -2,3 +2,4 @@ build/
 *.err
 .clangd
 bochslog.txt
+com1.out

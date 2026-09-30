@@ -3,6 +3,7 @@
 #include <dej/log.h>
 #include "interrupt/interrupt.h"
 #include "memory/memory.h"
+#include "sys/acpi/acpi.h"
 #include <dej/string.h>
 #include <dej/panic.h>
 #include <dej/msr.h>
@@ -106,10 +107,11 @@ void kentry(void) {
 
     serial_init();
     InterruptInit();
+    parse_acpi_earlyboot();
     memory_init(memmap_request.response, hhdm_request.response);
     virtual_memory_init();
     user_space_init();
-    // ata_init();                                          disabled while trying to boot on a real computer
+     ata_init();
     check_watchdog();
 
 
