@@ -12,8 +12,10 @@
 #include <dej/percpu.h>
 #include <dej/log.h>
 #include <stdatomic.h>
-
 #include <x86/tss.h>
+
+
+#define __HEALTH
 
 
 /*
@@ -74,21 +76,14 @@ void ap_entry(struct limine_mp_info *cpu){
             temperature_entry();
             break;
         }
-#ifdef __RC__
+
 #ifdef __HEALTH
         case 2:
             HealthMonitor();
             break;
-        case 3:
-            enter_userspace();
-            break;
 #else
-        case 2 :{
-            enter_userspace();
-            break;
-        }
 #endif
-#endif
+
         default: cpu_stop();
     }
 
