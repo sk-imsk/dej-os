@@ -107,9 +107,9 @@ void kentry(void) {
 
     serial_init();
     InterruptInit();
-    parse_acpi_earlyboot();
     memory_init(memmap_request.response, hhdm_request.response);
     virtual_memory_init();
+    parse_acpi_earlyboot();
     user_space_init();
     check_watchdog();
 

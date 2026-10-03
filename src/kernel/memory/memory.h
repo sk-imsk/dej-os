@@ -12,6 +12,10 @@ typedef uint64_t raw_page;
 
 #define PAGE_SIZE KiB(4)
 
+#define PCI_ECAM_BASE 0xFFFFFFFFF0000000ULL
+#define PCI_ECAM_SIZE 0x10000000ULL
+#define PCI_ECAM_PHYS 0x00000000B0000000ULL
+
 
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * hhdm);

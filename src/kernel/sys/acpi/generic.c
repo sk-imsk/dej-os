@@ -3,6 +3,7 @@
 #include <dej/kernel.h>
 #include <dej/panic.h>
 #include <dej/string.h>
+#include "generic.h"
 #include "pcie.h"
 
 
@@ -16,17 +17,6 @@ struct RSDP_t {
  uint32_t RsdtAddress;
 } __attribute__ ((packed));
 
-typedef struct SDT_header {
-  char Signature[4];
-  uint32_t Length;
-  uint8_t Revision;
-  uint8_t Checksum;
-  char OEMID[6];
-  char OEMTableID[8];
-  uint32_t OEMRevision;
-  uint32_t CreatorID;
-  uint32_t CreatorRevision;
-} __attribute__ ((packed)) RSDT_t ;
 
 struct RSDT {
   RSDT_t header;
@@ -48,16 +38,6 @@ struct XSDP_t {
 } __attribute__ ((packed));
 
 
-static bool check_rsdtsum(RSDT_t * r){
-    uint8_t * bytes = (uint8_t *)r;
-    uint8_t acc = 0;
-
-    for (uint8_t i = 0; i < r->Length; i++ ){
-        acc += bytes[i];
-    }
-
-    return acc == 0;
-}
 
 static bool check_rsdpsum(struct RSDP_t * r){
     uint8_t * bytes = (uint8_t *)r;
@@ -84,12 +64,6 @@ static void *find_x(struct RSDT *rsdt, const char * s)
     return NULL;
 }
 
-static inline void * phys2virt32(uint32_t addr){
-    return (void *)(addr + hhdm_request.response->offset);
-}
-static inline void * phys2virt64(uint64_t addr){
-    return (void *)(addr + hhdm_request.response->offset);
-}
 
 static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
 
@@ -103,7 +77,7 @@ static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
 
     struct RSDT * rsdt = (struct RSDT *)(phys2virt32(rsdp->RsdtAddress));
 
-    if (!(check_rsdtsum(&rsdt->header))) {
+    if (!(check_genericsum(&rsdt->header))) {
     panic("rsdt invalid", STATUS_HARDWARE_FAILURE);
     }
 

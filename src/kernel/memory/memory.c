@@ -8,7 +8,6 @@
 
 #define USER_CODE  0x400000
 #define USER_STACK 0x800000
-
 static uint64_t pages = 0;
 static bool inited = false;
 struct page{
@@ -239,27 +238,34 @@ void retpage(void * ptr){
 int virtual_memory_init(void) {
     cpu_stop_interrupts();
 
-    uint64_t new_pml4_phys = __giverawpage();
+    address_space_t newpml4;
+
+    newpml4.pml4_phys = __giverawpage();
 
     // Safety check for alignment & low memory
-    if (new_pml4_phys < 0x100000 || (new_pml4_phys & 0xFFF) != 0) {
+    if (newpml4.pml4_phys < 0x100000 || (newpml4.pml4_phys & 0xFFF) != 0) {
         return -1; // Allocation failed or unaligned
     }
 
-    uint64_t *new_pml4 = (uint64_t *)phys2virt(new_pml4_phys);
+    newpml4.pml4 = (uint64_t *)phys2virt(newpml4.pml4_phys);
 
     uint64_t current_cr3 = get_cr3();
     uint64_t *boot_pml4 = (uint64_t *)phys2virt(current_cr3 & ~0xFFFULL);
 
     // 1. Copy ONLY higher-half mappings from boot PML4 (indices 256 to 511)
-    memcpy(&new_pml4[256], &boot_pml4[256], 256 * sizeof(uint64_t));
+    memcpy(&newpml4.pml4[256], &boot_pml4[256], 256 * sizeof(uint64_t));
 
     // 2. Explicitly zero out lower-half mappings (indices 0 to 255)
-    memset(&new_pml4[0], 0, 256 * sizeof(uint64_t));
+    memset(&newpml4.pml4[0], 0, 256 * sizeof(uint64_t));
+
+
+    for (uint64_t off = 0; off < PCI_ECAM_SIZE; off += KiB(4)) {
+        map_page(&newpml4, PCI_ECAM_BASE + off, PCI_ECAM_PHYS + off, PAGE_PRESENT | PAGE_WRITE | PAGE_NX);
+    }
 
 
     // 3. Switch to the new page table
-    write_cr3(new_pml4_phys);
+    write_cr3(newpml4.pml4_phys);
 
     cpu_enable_interrupts();
 
