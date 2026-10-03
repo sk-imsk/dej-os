@@ -7,7 +7,7 @@
 
 
 
-int RegisterPcieDriver(struct pci_driver * drv){
+int RegisterPcieDriver(struct pci_driver * drv __unused){
 
 	// to do
 
