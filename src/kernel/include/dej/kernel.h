@@ -12,7 +12,8 @@
 #define likely(x) __builtin_expect(!!(x), true)
 #define unlikely(x) __builtin_expect(!!(x), false)
 #define always_inline __attribute__((always_inline))
-#define __unused __attribute__((unused))
+#define __unused   __attribute__((unused))
+
 
 #define KiB(x) (x) * 1024
 #define KB(x) (x) * 1000

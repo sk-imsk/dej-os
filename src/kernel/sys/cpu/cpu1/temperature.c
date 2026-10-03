@@ -14,6 +14,8 @@ void temperature_entry(void)
     uint64_t random;
     LogfStr("cpu %i is ready to read the temperature\n", percpu_read(cpu_id));
 
+    percpu_write(cpu_state, 0x1);
+
     for (;;){
         if (rdrand(&random)) {
             atomic_store(&temperature, random % 131);
@@ -22,7 +24,7 @@ void temperature_entry(void)
             cpu_stop();
         }
 
-        if (percpu_read(cpu_state) & 0x1) {
+        if (!(percpu_read(cpu_state) & 0x1)) {
           cpu_stop_interrupts();
           cpu_stop();
         }

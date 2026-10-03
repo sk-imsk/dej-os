@@ -515,7 +515,7 @@ struct file_fat32 fat_open(const char * path){
         LogfStr("component: %s \n", component);
 
          if (findfat_file(component, &dirent, HL_CLUSTER) != 0){
-             LogfStr("Failed to read disk at %ul \n", HL_CLUSTER);
+             LogfStr("Failed to read disk at lba %lu \n", HL_CLUSTER);
              return ret;
          }
 

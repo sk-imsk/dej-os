@@ -196,6 +196,10 @@ void vlog(const char * fmt, va_list args){
 
 void LogStr(const char * s){
     aquire_lock(&com1_lock);
+
+
+    putc(*s);               // to prevent first character getting dropped
+
     while (*s++){
 
         if (*s == '\n') putc('\r');

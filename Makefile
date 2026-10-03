@@ -3,7 +3,7 @@ KERNEL_DIR := src/kernel
 
 ASM := nasm
 CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=gnu11 -g3 -mrdrnd -Wall -Wextra -Werror -O2 -mno-sse -I./src/kernel/include -I./src/kernel/arch -mgeneral-regs-only
+CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=gnu11 -g3 -mrdrnd -Wall -Wextra -Werror -O2 -mno-sse -I./src/kernel/include -I./src/kernel/arch -mgeneral-regs-only  -D__RC__
 # bro too many args bro
 LD := ld.lld
 
@@ -30,7 +30,16 @@ ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 
 S_SOURCES := $(shell find $(KERNEL_DIR) -name '*.S')
 S_OBJECTS := $(patsubst $(KERNEL_DIR)/%.S, $(BUILD_DIR)/%.o, $(S_SOURCES))
-.PHONY: all kernel image run clean
+
+
+
+ifeq ($(MAKECMDGOALS),rc)
+CCFLAGS := $(filter-out -D__RC__,$(CCFLAGS))
+endif
+
+.PHONY: all kernel image run clean rc
+
+rc: all
 
 all: always image
 
@@ -94,12 +103,13 @@ always:
 	mkdir -p build/interrupt
 	mkdir -p build/memory
 	mkdir -p build/x86/
-	mkdir -p build/cpu/cpu1/
+	mkdir -p build/sys/cpu/cpu1/
 	mkdir -p build/drivers/disk
 	mkdir -p build/drivers/framebuffer
 	mkdir -p build/include/dej
-	mkdir -p build/cpu/cpu2
-	mkdir -p build/cpu/cpu3
+	mkdir -p build/sys/cpu/cpu2
+	mkdir -p build/sys/cpu/cpu3
+	mkdir -p build/sys/acpi
 
 clean:
 	sudo umount $(MNT) 2>/dev/null || true

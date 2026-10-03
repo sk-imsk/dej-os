@@ -21,7 +21,7 @@ void enter_userspace(void){
     void * buf = (void *)(u_buf);
     struct file_fat32 exec = fat_open("dih.bin");
     if (exec.first_cluster < 2){
-        LogStr("opening dih.bin failed ");
+        LogStr("opening dih.bin failed \n");
         return;
 
     }

@@ -15,6 +15,9 @@
 #include <x86/tss.h>
 
 
+#define __HEALTH
+
+
 /*
  *  irq is basically like which interrupt is being handled
  * sil is interrupt level to like mask stuff
@@ -73,25 +76,18 @@ void ap_entry(struct limine_mp_info *cpu){
             temperature_entry();
             break;
         }
-#ifdef __RC__
+
 #ifdef __HEALTH
         case 2:
             HealthMonitor();
             break;
-        case 3:
-            enter_userspace();
-            break;
 #else
-        case 2 :{
-            enter_userspace();
-            break;
-        }
 #endif
-#endif
+
         default: cpu_stop();
     }
 
-    LogfStr("core %ul returned halting on core\n", percpu_read(cpu_id));
+    LogfStr("core %lu returned halting on core\n", percpu_read(cpu_id));
     percpu_write(sil, 10);
     percpu_write(cpu_state, 0x1);
     cpu_stop();
