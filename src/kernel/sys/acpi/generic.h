@@ -26,7 +26,7 @@ inline bool check_genericsum(struct SDT_header * r){
     uint8_t * bytes = (uint8_t *)r;
     uint8_t acc = 0;
 
-    for (uint8_t i = 0; i < r->Length; i++ ){
+    for (uint32_t i = 0; i < r->Length; i++ ){
         acc += bytes[i];
     }
 
