@@ -1,25 +1,20 @@
 #include <dej/kernel.h>
 #include <dej/percpu.h>
 
-void aquire_lock(lock_t * lock){
-    bool percpu_ready = ispercpuready();
-    int current_cpu;
 
-    if (percpu_ready){
-        current_cpu = percpu_read(cpu_id);
-    } else {
-        current_cpu = 0;
-    }
+void aquire_lock(lock_t *lock){
+	bool percpu = ispercpuready();
+	int current_cpu = 0;
 
-    if (lock->holding_cpu == current_cpu) return;               // dont waste time yo
+	if (percpu) current_cpu = percpu_read(cpu_id);
 
-    while (atomic_exchange_explicit(&lock->held, true, memory_order_acquire)){
-        cpu_takebreak();
-    }
+	if (lock->holding_cpu == current_cpu) return;	// avoid deadlock
 
-    lock->holding_cpu = current_cpu;
-    lock->held = true;
+	while (atomic_exchange_explicit(&lock->held, true, memory_order_acquire)) {
+		cpu_takebreak();
+	}
 
+	lock->holding_cpu = current_cpu;
 }
 
 void release_lock(lock_t * lock) {
