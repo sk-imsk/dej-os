@@ -8,7 +8,7 @@ typedef uint16_t status;
 #define STATUS_HARDWARE_FAILURE 3 /* hardware failed */
 #define STATUS_LOCKUP   4               /* processor lockup */
 #define STATUS_NOMEM    5       /* System out of memory */
-
+#define STATUS_INVALID 6     /* Invalid arguments to critical function */
 
 _Noreturn void panic(const char *s,  status code);
 _Noreturn void fi_panic(const char * cooked);

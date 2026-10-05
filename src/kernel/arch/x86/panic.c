@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <dej/cpu.h>
 #include <dej/percpu.h>
-#include <dej/framebuffer.h>
+#include <drivers/framebuffer/framebuffer.h>
 #include <dej/panic.h>
 
 
