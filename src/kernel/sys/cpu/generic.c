@@ -4,6 +4,7 @@
 #include "cpu1/temperature.h"
 #include "cpu2/health.h"
 #include "cpu3/user_space.h"
+#include "cpu4/sound.h"
 #include "../memory/memory.h"
 #include <dej/panic.h>
 #include <dej/string.h>
@@ -14,8 +15,6 @@
 #include <stdatomic.h>
 #include <x86/tss.h>
 
-
-#define __HEALTH
 
 
 /*
@@ -81,7 +80,13 @@ void ap_entry(struct limine_mp_info *cpu){
         case 2:
             HealthMonitor();
             break;
+        case 3:
+        	cpu_stop();
+        case 4:
+        	sound_entry();
 #else
+	case 2:
+		sound_entry();
 #endif
 
         default: cpu_stop();

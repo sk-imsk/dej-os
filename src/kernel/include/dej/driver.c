@@ -1,4 +1,4 @@
-#include "../../sys/acpi/pcie.h"
+#include <drivers/acpi/pcie.h>
 #include <dej/kernel.h>
 #include <dej/log.h>
 
