@@ -7,8 +7,8 @@
 
 #define HDA_CORBLBASE 0x40
 #define HDA_CORBUBASE 0x44
-#define HDA_CORBRP    0x48
-#define HDA_CORBWP    0x4A
+#define HDA_CORBWP    0x48
+#define HDA_CORBRP    0x4A
 #define HDA_CORBCTL  0x4C
 #define HDA_CORBSTS  0x4D
 #define HDA_CORBSIZE 0x4E

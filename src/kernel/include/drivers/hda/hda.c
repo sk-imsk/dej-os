@@ -67,7 +67,9 @@ uint16_t hda_getring_size(uint8_t caps){
     	return 0; // controller supports nothing usable
 }
 
-int sound_init(buffers_t * buf, struct pci_device * dev __unused, volatile uint8_t * mmio){
+int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio){
+
+	if (dev->vendor_id != 0x8086) return EINVAL;
 
 	mmio_write8(mmio + HDA_CORBCTL, 0);
 	mmio_write8(mmio + HDA_RIRBCTL, 0);
@@ -86,7 +88,7 @@ int sound_init(buffers_t * buf, struct pci_device * dev __unused, volatile uint8
 
 	while (!(mmio_read16(mmio + HDA_CORBRP) & 0x8000)) {
 		if (--timeout == 0){
-			LogStr("corbrp failed to move to the start\n");					// <------------fails here
+			LogStr("corbrp failed to move to the start\n");
 			return ENXIO;
 		}
 		delay(10);
@@ -107,12 +109,5 @@ int sound_init(buffers_t * buf, struct pci_device * dev __unused, volatile uint8
 	mmio_write16(mmio + HDA_CORBWP, 0);
 
 
-	uint16_t rirb_last  = 0;
-
-	uint16_t old = rirb_last;
-
-	while (mmio_read16(mmio + HDA_RIRBWP) == old) cpu_takebreak();
-
-	LogStr("got corb response");
 	return 0;
 }
