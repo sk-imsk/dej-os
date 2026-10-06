@@ -2,7 +2,7 @@
  * User space idk ig
  *
  */
-#include <dej/ata.h>
+#include <drivers/disk/ata.h>
 #include <dej/log.h>
 #include <dej/kernel.h>
 #include "../interrupt/interrupt.h"

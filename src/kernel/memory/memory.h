@@ -15,11 +15,15 @@ typedef uint64_t raw_page;
 #define PCI_ECAM_BASE 0xFFFFFFFFF0000000ULL
 #define PCI_ECAM_SIZE 0x10000000ULL
 #define PCI_ECAM_PHYS 0x00000000B0000000ULL
+#define MMIO_BASE  0xFFFFFFFFE0000000ULL
+#define MMIO_SIZE  0x10000000ULL
+#define MMIO_END   0xFFFFFFFFEFFFFFFFULL
 
 
 
 int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_response * hhdm);
 int virtual_memory_init(void);
+void * map_mmio(uint64_t phys);
 void * KGetPage(void);
 void retpage(void * ptr);
 void user_space_init(void);

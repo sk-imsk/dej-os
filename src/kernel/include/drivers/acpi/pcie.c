@@ -3,17 +3,18 @@
 #include <dej/driver.h>
 #include "generic.h"
 #include "pcie.h"
-#include "../../memory/memory.h"
-
+#include <dej/memory.h>
 
 #define PCI_VENDOR_ID   0x00
 #define PCI_DEVICE_ID   0x02
+#define PCI_BAR 0x10
 #define PCI_CLASS       0x0B
 #define PCI_SUBCLASS    0x0A
 #define PCI_PROGIF      0x09
 #define PCI_HEADER_TYPE 0x0E
 
 
+extern struct pci_device sound_dev;
 
 typedef struct SDT_header mcfg_header_t;
 
@@ -31,7 +32,9 @@ struct mcfg {
     MCFG_entry_t entries[];
 }__attribute__((packed));
 
-static volatile uint8_t *pci_config(
+
+
+volatile uint8_t *pci_config(
     uint8_t bus,
     uint8_t device,
     uint8_t function)
@@ -44,7 +47,38 @@ static volatile uint8_t *pci_config(
     return (volatile uint8_t *)(PCI_ECAM_BASE + offset);
 }
 
-struct pci_driver * drivers[8] = {0};
+uint64_t pci_read_bar(
+    uint8_t bus,
+    uint8_t device,
+    uint8_t function,
+    uint8_t bar_num)
+{
+    volatile uint8_t *config = pci_config(bus, device, function);
+
+    uint32_t low =
+        *(volatile uint32_t *)(config + 0x10 + bar_num * 4);
+
+    // I/O BAR
+    if (low & 1) {
+        return (uint64_t)(low & ~0x3U);
+    }
+
+    // Memory BAR
+    uint8_t type = (low >> 1) & 3;
+
+    // 64-bit memory BAR
+    if (type == 2) {
+        uint32_t high =
+            *(volatile uint32_t *)(config + 0x10 + (bar_num + 1) * 4);
+
+        return ((uint64_t)high << 32) |
+               (uint64_t)(low & ~0xFULL);
+    }
+
+    // 32-bit memory BAR
+    return (uint64_t)(low & ~0xFULL);
+}
+
 
 
 void get_driver(void){
@@ -60,7 +94,6 @@ void get_driver(void){
 
          			ret.vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
 
-            			LogfStr("vendor id = %x \n", ret.vendor_id);
 
           			if (ret.vendor_id == 0xffff)
               			continue;
@@ -76,7 +109,16 @@ void get_driver(void){
                   		ret.header_type = *(volatile uint8_t *)(cfg + PCI_HEADER_TYPE);
 
 
+                      		for (int i = 0; i < 6; i++) {
+                        		ret.bar[i] = pci_read_bar(bus, device,function, i);
+                        	}
+
+
                     		// find driver or something
+                      		if (ret.class == 4 && ret.subclass == 3){
+                       			sound_dev = ret;
+                         		LogfStr("Sound device found\n");
+                        	}
 
 
             		}
@@ -92,9 +134,6 @@ void mcfg_enter(void * mcfg ){
 
 
     check_genericsum(&mh->header);
-
-
-    LogStr("Yo mgfg check passed\n");
 
     size_t entry_count =
         (mh->header.Length
@@ -113,7 +152,7 @@ void mcfg_enter(void * mcfg ){
     }
 
 
-
+    get_driver();
 
 
 }

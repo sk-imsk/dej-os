@@ -234,17 +234,16 @@ void retpage(void * ptr){
    panic("Attempted deallocation of nonexistent page", STATUS_UNKNOWN);
 }
 
+address_space_t newpml4;
 
 int virtual_memory_init(void) {
     cpu_stop_interrupts();
-
-    address_space_t newpml4;
 
     newpml4.pml4_phys = __giverawpage();
 
     // Safety check for alignment & low memory
     if (newpml4.pml4_phys < 0x100000 || (newpml4.pml4_phys & 0xFFF) != 0) {
-        return -1; // Allocation failed or unaligned
+        panic("memory failure", STATUS_NOMEM);
     }
 
     newpml4.pml4 = (uint64_t *)phys2virt(newpml4.pml4_phys);
@@ -272,6 +271,13 @@ int virtual_memory_init(void) {
     return 0;
 }
 
+
+static uint64_t offst = 0;
+void * map_mmio(uint64_t phys){
+	map_page(&newpml4, MMIO_BASE + offst, phys, PAGE_NX | PAGE_PRESENT | PAGE_WRITE);
+	offst += PAGE_SIZE;
+	return (void *)MMIO_BASE + offst - PAGE_SIZE; // because we incremented it for next time we gotta subtrace (gcc will optimise or sum prob)
+}
 
 void * u_buf;
 uint64_t user_cr3;

@@ -26,7 +26,7 @@
 #define ESRCH		3	/* No such process */
 #define EINTR		4	/* Interrupted system call */
 #define EIO		5	/* Input/output error */
-#define ENXIO		6	/* Device not configured */
+#define ENXIO		6	/* Device not configured or failed */
 #define E2BIG		7	/* Argument list too long */
 #define ENOEXEC		8	/* Exec format error */
 #define EBADF		9	/* Bad file descriptor */

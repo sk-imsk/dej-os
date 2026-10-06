@@ -3,12 +3,11 @@
 #include <dej/log.h>
 #include "interrupt/interrupt.h"
 #include "memory/memory.h"
-#include "sys/acpi/acpi.h"
+#include <drivers/acpi/acpi.h>
 #include <dej/string.h>
 #include <dej/panic.h>
 #include <dej/msr.h>
 #include <dej/cpu.h>
-#include <dej/ata.h>
 #include <dej/percpu.h>
 #include <dej/kernel.h>
 #include <dej/sil.h>

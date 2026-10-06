@@ -99,18 +99,19 @@ run: image
 
 always:
 	mkdir -p build/arch/x86
-	mkdir -p build/drivers/keyboard
+	mkdir -p build/include/drivers/keyboard
 	mkdir -p build/interrupt
 	mkdir -p build/memory
 	mkdir -p build/x86/
 	mkdir -p build/sys/cpu/cpu1/
-	mkdir -p build/drivers/disk
-	mkdir -p build/drivers/framebuffer
+	mkdir -p build/include/drivers/disk
+	mkdir -p build/include/drivers/framebuffer
 	mkdir -p build/include/dej
 	mkdir -p build/sys/cpu/cpu2
 	mkdir -p build/sys/cpu/cpu3
-	mkdir -p build/sys/acpi
-
+	mkdir -p build/include/drivers/acpi/
+	mkdir -p build/sys/cpu/cpu4
+	mkdir -p build/include/drivers/hda
 clean:
 	sudo umount $(MNT) 2>/dev/null || true
 	rm -rf $(BUILD_DIR)

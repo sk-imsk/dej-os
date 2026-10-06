@@ -1,7 +1,7 @@
 #include <dej/kernel.h>
 #include <dej/cpu.h>
 #include <dej/limine.h>
-#include <dej/framebuffer.h>
+#include <drivers/framebuffer/framebuffer.h>
 #include <dej/panic.h>
 #include <dej/driver.h>
 
@@ -15,6 +15,7 @@ extern _Atomic uint64_t temperature;
 void test_probe(struct pci_device * dih __unused){
 	LogStr("driver loaded");
 }
+
 
 _Noreturn void kmain(void){
     framebuffer = framebuffer_request.response->framebuffers[0];
@@ -49,16 +50,7 @@ _Noreturn void kmain(void){
 
     cpu_takebreak();
 
-    struct pci_driver sdrv = {
-        .class = 0x03,
-        .subclass = 0x00,
-        .prog_if = 0x00,
-        .vendor_id = 0x1234,
-        .device_id = 0x1111,
 
-        .probe = test_probe,
-    };
 
-    RegisterPcieDriver(&sdrv);
     cpu_stop();
 }
