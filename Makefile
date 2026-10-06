@@ -1,64 +1,37 @@
+ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+export ROOT_DIR
+
+SUBDIRS := kernel re programs
 BUILD_DIR := build
 KERNEL_DIR := src/kernel
-
-ASM := nasm
-CC := gcc
-CCFLAGS := -ffreestanding -fno-stack-protector -fno-pie -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-builtin -fno-omit-frame-pointer -mno-red-zone -m64 -mcmodel=kernel -std=gnu11 -g3 -mrdrnd -Wall -Wextra -Werror -O2 -mno-sse -I./src/kernel/include -I./src/kernel/arch -mgeneral-regs-only  -D__RC__
-# bro too many args bro
-LD := ld.lld
 
 LIMINE_DIR := limine
 LIMINE := $(LIMINE_DIR)/bin/limine
 
-KERNEL := $(BUILD_DIR)/kernel.elf
+KERNEL := $(BUILD_DIR)/kernel/kernel.elf
 IMAGE := $(BUILD_DIR)/dej-os.img
 MNT := $(BUILD_DIR)/mnt
 
 ARCH ?= x86
 
-C_SOURCES := $(shell find $(KERNEL_DIR) -name '*.c' \
-    -not -path '$(KERNEL_DIR)/arch/*' \
-    -o -path '$(KERNEL_DIR)/arch/$(ARCH)/*.c')
 
-C_OBJECTS := $(patsubst $(KERNEL_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
+.PHONY: all clean $(SUBDIRS)
 
-ASM_SOURCES := $(shell find $(KERNEL_DIR) -name '*.asm' \
-    -not -path '$(KERNEL_DIR)/arch/*' \
-    -o -path '$(KERNEL_DIR)/arch/$(ARCH)/*.asm')
+all: kernel re programs image
 
-ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
+kernel:
+	$(MAKE) -C src/$@
 
-S_SOURCES := $(shell find $(KERNEL_DIR) -name '*.S')
-S_OBJECTS := $(patsubst $(KERNEL_DIR)/%.S, $(BUILD_DIR)/%.o, $(S_SOURCES))
+re:
+	$(MAKE) -C src/$@
 
+programs:
+	$(MAKE) -C src/$@
 
-
-ifeq ($(MAKECMDGOALS),rc)
-CCFLAGS := $(filter-out -D__RC__,$(CCFLAGS))
-endif
-
-.PHONY: all kernel image run clean rc
-
-rc: all
-
-all: always image
-
-kernel: $(KERNEL)
-
-
-$(KERNEL): $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/linker.ld
-	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS)
-
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
-	$(CC) $(CCFLAGS) -c $< -o $@
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.asm
-	$(ASM) -f elf64 $< -o $@
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.S
-	$(CC) $(CCFLAGS) -c $< -o $@
 
 image: $(IMAGE)
 
-$(IMAGE): $(KERNEL) limine.conf
+$(IMAGE): kernel $(ROOT_DIR)/limine.conf
 
 	rm -f $@
 
@@ -94,24 +67,8 @@ $(IMAGE): $(KERNEL) limine.conf
 	rm -f $(BUILD_DIR)/loopdev
 
 	$(LIMINE) bios-install $@
-run: image
-	qemu-system-x86_64 -drive format=raw,file=$(IMAGE)
 
-always:
-	mkdir -p build/arch/x86
-	mkdir -p build/include/drivers/keyboard
-	mkdir -p build/interrupt
-	mkdir -p build/memory
-	mkdir -p build/x86/
-	mkdir -p build/sys/cpu/cpu1/
-	mkdir -p build/include/drivers/disk
-	mkdir -p build/include/drivers/framebuffer
-	mkdir -p build/include/dej
-	mkdir -p build/sys/cpu/cpu2
-	mkdir -p build/sys/cpu/cpu3
-	mkdir -p build/include/drivers/acpi/
-	mkdir -p build/sys/cpu/cpu4
-	mkdir -p build/include/drivers/hda
+
 clean:
-	sudo umount $(MNT) 2>/dev/null || true
+	sudo umount -l $(MNT) 2>/dev/null || true
 	rm -rf $(BUILD_DIR)
