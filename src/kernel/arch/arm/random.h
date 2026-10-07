@@ -11,6 +11,6 @@ static inline int rdrand(uint64_t *value){
             : "cc"
         );
 
-    return ok
+    return ok;
 
 }
