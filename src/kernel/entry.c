@@ -24,7 +24,7 @@ limine_request
 volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
 
 limine_request
-volatile struct limine_framebuffer_request framebuffer_request = {
+	volatile struct limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
     .revision = 0
 };

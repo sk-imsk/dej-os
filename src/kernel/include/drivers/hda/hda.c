@@ -76,10 +76,10 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 
 	uint64_t raw = virt2phys(buf);
 
-	mmio_write32(mmio + HDA_CORBLBASE, raw + 1024);
+	mmio_write32(mmio + HDA_CORBLBASE, raw);
 	mmio_write32(mmio + HDA_CORBUBASE, (raw + 1024) >> 32);			// give corb buffer
 
-	mmio_write32(mmio + HDA_RIRBLBASE, raw);
+	mmio_write32(mmio + HDA_RIRBLBASE, raw + 1024);
 	mmio_write32(mmio + HDA_RIRBUBASE, raw >> 32);					// give corb buffer
 
 	mmio_write16(mmio + HDA_CORBRP, 0x8000);
@@ -103,11 +103,6 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 	mmio_write8(mmio + HDA_RIRBCTL, 0x02);
 
 	LogStr("corbrp reset succesfully\n");
-
-	buf->corb[0] = 0x000F0004;
-
-	mmio_write16(mmio + HDA_CORBWP, 0);
-
 
 	return 0;
 }

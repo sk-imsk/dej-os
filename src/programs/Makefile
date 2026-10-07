@@ -1,4 +1,4 @@
 .PHONY: all
 
 all:
-	echo hi
+	nasm -f bin dih.asm -o out.bin
