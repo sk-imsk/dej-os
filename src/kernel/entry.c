@@ -6,7 +6,6 @@
 #include <drivers/acpi/acpi.h>
 #include <dej/string.h>
 #include <dej/panic.h>
-#include <dej/msr.h>
 #include <dej/cpu.h>
 #include <dej/percpu.h>
 #include <dej/kernel.h>
