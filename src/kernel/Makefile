@@ -23,12 +23,6 @@ C_SOURCES := $(shell find $(KERNEL_DIR) \( \
 
 C_OBJECTS := $(patsubst $(KERNEL_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
 
-ASM_SOURCES := $(shell find $(KERNEL_DIR) \( \
-    -path '$(KERNEL_DIR)/arch/$(ARCH)/*' -o \
-    -not -path '$(KERNEL_DIR)/arch/*' \
-    \) -name '*.asm')
-
-ASM_OBJECTS := $(patsubst $(KERNEL_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 
 S_SOURCES := $(shell find $(KERNEL_DIR) \( \
     -path '$(KERNEL_DIR)/arch/$(ARCH)/*' -o \
