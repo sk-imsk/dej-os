@@ -1,4 +1,5 @@
-%macro PUSH_ALL 0
+.intel_syntax noprefix
+.macro PUSH_ALL
     push rax
     push rcx
     push rdx
@@ -14,11 +15,11 @@
     push r13
     push r14
     push r15
-%endmacro
+.endm
 
 
 
-%macro POP_ALL 0
+.macro POP_ALL
     pop r15
     pop r14
     pop r13
@@ -34,10 +35,10 @@
     pop rdx
     pop rcx
     pop rax
-%endmacro
+.endm
 
-extern divide_by_0_handler
-global int_divide_by_0
+
+.global int_divide_by_0
 int_divide_by_0:
     PUSH_ALL
 
@@ -48,8 +49,8 @@ int_divide_by_0:
     POP_ALL
     iretq
 
-extern nmi_handler
-global int_nmi
+
+.global int_nmi
 int_nmi:
     PUSH_ALL
 
@@ -61,8 +62,8 @@ int_nmi:
     POP_ALL
     iretq
 
-extern tss_handler
-global int_tss
+
+.global int_tss
 int_tss:
     PUSH_ALL
 
@@ -73,8 +74,8 @@ int_tss:
     POP_ALL
     iretq
 
-extern general_protection_fault_handler
-global int_general_protection_fault
+
+.global int_general_protection_fault
 int_general_protection_fault:
     PUSH_ALL
 
@@ -88,13 +89,12 @@ int_general_protection_fault:
 
 
 
-extern page_fault_handler
-global int_page_fault
+.global int_page_fault
 int_page_fault:
     PUSH_ALL
 
     mov rdi, rsp
-    cld                             ; for sysV support
+    cld                             # for sysV support
     call page_fault_handler
 
 
