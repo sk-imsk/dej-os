@@ -4,6 +4,7 @@
 #include <drivers/framebuffer/framebuffer.h>
 #include <dej/panic.h>
 #include <dej/driver.h>
+#include <dej/log.h>
 
 
 struct limine_framebuffer *framebuffer;
