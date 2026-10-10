@@ -101,8 +101,8 @@ int_page_fault:
     POP_ALL
     iretq
 
-extern watchdog_handler
-global int_watchdog
+
+.global int_watchdog
 int_watchdog:
     PUSH_ALL
 
