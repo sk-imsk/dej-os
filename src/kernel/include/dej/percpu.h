@@ -5,7 +5,7 @@
 #include <dej/string.h>
 #include <dej/msr.h>
 #include <x86/tss.h>
-
+#include <dej/watchdog.h>
 
 /*
  * per cpu things
@@ -65,8 +65,8 @@ extern char __percpu_end[];
     ); \
 })
 
-#define percpu_ptr(var) \
-    ((typeof(&(var)))(cpu_percpu[cpu_id] + percpu_offsetof(var)))
+
+
 
 
 extern DEFINE_PERCPU(_Atomic uint64_t, cpu_state);
@@ -74,10 +74,11 @@ extern DEFINE_PERCPU(uint64_t, irq);
 extern DEFINE_PERCPU(uint64_t, sil);
 extern DEFINE_PERCPU(uint64_t, cpu_id);
 extern DEFINE_PERCPU(tss_cpu *, tss);
+extern DEFINE_PERCPU(struct watchdog, dog);
 
 #define MAX_CPUS 64
 
-extern uint8_t *cpu_percpu[MAX_CPUS];       // pointer to all cpus data or something
+extern void *cpu_percpu[MAX_CPUS];       // pointer to all cpus data or something
 
 
 

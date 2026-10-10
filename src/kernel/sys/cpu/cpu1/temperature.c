@@ -17,16 +17,17 @@ void temperature_entry(void)
     percpu_write(cpu_state, 0x1);
 
     for (;;){
-        if (rdrand(&random)) {
-            atomic_store(&temperature, random % 131);
-        } else {
-            LogfStr("rdrand failed stopping high tech temperature sensor tech");
-            cpu_stop();
+    	if (rdrand(&random)) {
+     		atomic_store(&temperature, random % 131);
+     	} else {
+      		LogfStr("rdrand failed stopping high tech temperature sensor tech");
+        	cpu_stop();
         }
 
-        if (!(percpu_read(cpu_state) & 0x1)) {
-          cpu_stop_interrupts();
-          cpu_stop();
+     	if (!(percpu_read(cpu_state) & 0x1)) {
+      		LogStr("temp shutting down cuz cpu state says so");
+        	cpu_stop_interrupts();
+         	cpu_stop();
         }
 
 

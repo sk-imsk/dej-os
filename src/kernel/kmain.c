@@ -4,6 +4,7 @@
 #include <drivers/framebuffer/framebuffer.h>
 #include <dej/panic.h>
 #include <dej/driver.h>
+#include <dej/watchdog.h>
 
 
 struct limine_framebuffer *framebuffer;
@@ -30,5 +31,6 @@ _Noreturn void kmain(void){
 			putpixel(x, y, 0x00FFFF);
 		}
 	}
-	cpu_stop();
+
+	jump_to_watchdog();
 }

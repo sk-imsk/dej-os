@@ -14,6 +14,7 @@
 #include <drivers/hda/hda.h>
 #include <dej/percpu.h>
 #include <dej/memory.h>
+#include <dej/sil.h>
 
 
 struct pci_device sound_dev = {0};
@@ -51,6 +52,9 @@ _Noreturn void sound_entry(){
 	if (res) {
 		LogfStr("sound init returned %i \n", res);
 	}
+
+
+	LogStr("Time out.\n");
 
 
 	cpu_stop();
