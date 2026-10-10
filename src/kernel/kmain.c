@@ -5,7 +5,7 @@
 #include <dej/panic.h>
 #include <dej/driver.h>
 #include <dej/log.h>
-
+#include <dej/watchdog.h>
 
 struct limine_framebuffer *framebuffer;
 volatile uint32_t *fb_ptr;
