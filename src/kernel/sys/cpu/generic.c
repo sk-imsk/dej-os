@@ -2,7 +2,6 @@
 #include <dej/cpu.h>
 #include <stdint.h>
 #include "cpu1/temperature.h"
-#include "cpu2/health.h"
 #include "cpu3/user_space.h"
 #include "cpu4/sound.h"
 #include "../memory/memory.h"
@@ -29,6 +28,7 @@ DEFINE_PERCPU(uint64_t, irq);
 DEFINE_PERCPU(uint64_t, sil);
 DEFINE_PERCPU(uint64_t, cpu_id);
 DEFINE_PERCPU(tss_cpu *, tss);
+DEFINE_PERCPU(struct watchdog, dog);
 
 extern tss_cpu tssforcpus[32];
 
@@ -75,21 +75,14 @@ void ap_entry(struct limine_mp_info *cpu){
             temperature_entry();
             break;
         }
-
-#ifdef __HEALTH
-        case 2:
-            HealthMonitor();
-            break;
-        case 3:
-        	cpu_stop();
-        case 4:
+        case 2: {
         	sound_entry();
-#else
-	case 2:
-		sound_entry();
-#endif
+         	break;
+        }
 
-        default: cpu_stop();
+        default: {
+        	cpu_stop();
+        }
     }
 
     LogfStr("core %lu returned halting on core\n", percpu_read(cpu_id));

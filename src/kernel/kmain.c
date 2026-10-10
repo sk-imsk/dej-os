@@ -7,6 +7,7 @@
 #include <dej/log.h>
 #include <dej/watchdog.h>
 
+
 struct limine_framebuffer *framebuffer;
 volatile uint32_t *fb_ptr;
 
@@ -31,5 +32,6 @@ _Noreturn void kmain(void){
 			putpixel(x, y, 0x00FFFF);
 		}
 	}
-	cpu_stop();
+
+	jump_to_watchdog();
 }

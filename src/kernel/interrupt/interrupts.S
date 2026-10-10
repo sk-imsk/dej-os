@@ -100,3 +100,15 @@ int_page_fault:
 
     POP_ALL
     iretq
+
+extern watchdog_handler
+global int_watchdog
+int_watchdog:
+    PUSH_ALL
+
+    mov rdi, rsp
+    cld
+    call watchdog_handler
+
+    POP_ALL
+    iretq

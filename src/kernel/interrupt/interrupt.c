@@ -4,6 +4,8 @@
 #include <dej/log.h>
 #include <dej/panic.h>
 #include <dej/percpu.h>
+#include <dej/watchdog.h>
+#include <dej/msr.h>
 
 lock_t iv_lock = {
     .held = false,
@@ -145,20 +147,19 @@ void page_fault_handler(page_fault_regs_t * frame){
     cpu_stop();
 }
 
-__attribute__ ((interrupt)) void u_test(base_regs_t * frame __attribute__((unused))) {
-    __asm__ volatile ("nop");
-}
+extern void int_watchdog(base_regs_t * x __unused);
 
 
 
 void InterruptInit(void){
 
 
-    idt_set_gate(0, int_divide_by_0, 0x8E);
-    idt_set_gate(2, int_nmi, 0x8E);
-    idt_set_gate(10, int_tss, 0x8E);
-    idt_set_gate(13, int_general_protection_fault, 0x8E);
-    idt_set_gate(14, int_page_fault, 0x8E);// will add more later
+    idt_set_gate(0x00, int_divide_by_0, 0x8E);
+    idt_set_gate(0x02, int_nmi, 0x8E);
+    idt_set_gate(0x0A, int_tss, 0x8E);
+    idt_set_gate(0x0D, int_general_protection_fault, 0x8E);
+    idt_set_gate(0x0E, int_page_fault, 0x8E);// will add more later
+    idt_set_gate(0x30, int_watchdog, 0x8E);
 
 
     struct IDTR idtr = {
@@ -174,7 +175,7 @@ void InterruptInit(void){
 
 
 /*
- * LoRegisterInterruptVector: attempts to register a interrupt handler
+ * RegisterInterruptVector: attempts to register a interrupt handler
  * Vector: Interrupt vector requested
  * *Handler: function pointer to le interrupt handler
  * Name: name of function not driver
@@ -195,9 +196,70 @@ void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name)
 
     idt_set_gate(vector, handler, 0xEE);
 
-    LogfStr("Interrupt vector %u registered succesfully to \" %s  \"\n", vector, name);
+    LogfStr("Interrupt vector %u registered succesfully to \"%s\"\n", vector, name);
 
     release_lock(&iv_lock);
 
     return;
+}
+
+
+
+#define LAPIC_ICR_LOW   0x300
+#define LAPIC_ICR_HIGH  0x310
+
+#define ICR_DELIVERY_PENDING (1u << 12)
+static void * lapic;
+static bool x2;
+
+static inline uint32_t lapic_read(uint32_t r){
+	return *(volatile uint32_t *)(lapic + r);
+}
+static inline void lapic_write(uint32_t r, uint32_t val){
+	*(volatile uint32_t *)(lapic + r) = val;
+
+}
+
+int send_ipi(uint8_t vector, uint32_t ap_id){
+	uint64_t msr = rdmsr(MSR_IA32_APIC_BASE);
+
+	uint8_t en = (msr >> 11) & 1;
+	uint8_t extd = (msr >> 10) & 1;
+
+    	if (en && extd) {
+     		//x2apic
+     		uint64_t icr =
+                   ((uint64_t)ap_id << 32) |
+                   vector;
+
+               wrmsr(MSR_X2APIC_ICR, icr);
+               x2 = true;
+     	} else if (en == 1 && extd == 0){
+    		if (!lapic) lapic = map_mmio(rdmsr(MSR_IA32_APIC_BASE) & 0xFFFFF000ULL);
+
+      		while (lapic_read(LAPIC_ICR_LOW) & ICR_DELIVERY_PENDING) __asm__ volatile("pause");
+
+
+          	lapic_write(LAPIC_ICR_HIGH, (ap_id & 0xFF) << 24);
+
+           	// Interrupt vector goes in ICR LOW, bits 0-7.
+		// Fixed delivery mode is 000, so the vector alone is sufficient.
+          	lapic_write(LAPIC_ICR_LOW, vector);
+
+           	x2 = false;
+
+      	} else {
+       		LogStr("apic disabled\n");
+         	return -1;
+       }
+
+
+     return 0;
+}
+void send_eoi(void){
+	if (x2){
+		wrmsr(MSR_APIC_EOI, 0);
+	} else {
+		lapic_write(0x0B0, 0);
+	}
 }

@@ -15,6 +15,9 @@
 #define MSR_IA32_STAR                                  0xC0000104
 #define MSR_LSTAR                                           0xC0000082
 #define MSR_FMASK                                          0xC0000084
+#define MSR_IA32_APIC_BASE                        0x1B
+#define MSR_X2APIC_ICR                                 0x830
+#define MSR_APIC_EOI                                     0x80B
 
 
 static inline uint64_t rdmsr(uint32_t msr)
