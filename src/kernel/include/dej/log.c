@@ -194,8 +194,7 @@ void vlog(const char * fmt, va_list args){
 
 }
 
-void LogStr(const char * s){
-    aquire_lock(&com1_lock);
+static void printk(const char * s){
 
 
     putc(*s);               // to prevent first character getting dropped
@@ -205,11 +204,29 @@ void LogStr(const char * s){
         if (*s == '\n') putc('\r');
         putc(*s);
     }
-    release_lock(&com1_lock);
 }
 
-void LogfStr(const char * s, ...){
+void LogStr(const char * module, const char * s){
+	aquire_lock(&com1_lock);
+
+	putc('[');
+    	printk(module);
+     	putc(']');
+      	putc(' ');
+
+
+      printk(s);
+
+
+      release_lock(&com1_lock);
+}
+void LogfStr(const char * module, const char * s, ...){
     aquire_lock(&com1_lock);
+
+    putc('[');
+    printk(module);
+    putc(']');
+    putc(' ');
 
     va_list args;
 
@@ -219,8 +236,6 @@ void LogfStr(const char * s, ...){
 
     release_lock(&com1_lock);
 }
-void LogStrEarly(const char *s);
-void LogfStrEarly(const char * s, ...);
 void LogRaw(void * buffer, size_t len){
     aquire_lock(&com1_lock);
 

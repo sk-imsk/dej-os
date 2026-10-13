@@ -7,6 +7,8 @@
 #include <dej/watchdog.h>
 #include <dej/msr.h>
 
+
+static const char mod[] = "kernel";
 lock_t iv_lock = {
     .held = false,
     .holding_cpu = -1
@@ -106,7 +108,7 @@ void idt_set_gate(uint8_t vector, void (*handler), uint8_t flags)
 
 extern void int_divide_by_0(void);
 void divide_by_0_handler(void){
-    LogStr("Division by 0 occured");
+    LogStr(mod, "Division by 0 occured");
     cpu_stop();
 }
 
@@ -115,14 +117,14 @@ extern void int_nmi(void);
 
 extern void int_tss(void);
 void tss_handler(tss_regs_t * frame){
-    LogfStr("Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame->ss, frame->rflags, frame->cs, frame->rip, frame->rsp, frame->error_code);
+    LogfStr(mod, "Tss fault frame: ss : %llu rflags: %llu cs: %llu rip: %llu rsp: %llu error code: %llu", frame->ss, frame->rflags, frame->cs, frame->rip, frame->rsp, frame->error_code);
 
     cpu_stop();
 }
 
 extern void int_general_protection_fault(void);
 void general_protection_fault_handler(gp_registers_t * frame){
-    LogfStr(
+    LogfStr(mod,
         "GP: ec=%lx rip=%lx cs=%lx rflags=%lx rsp=%lx ss=%lx\n",
         frame->ec,
         frame->rip,
@@ -131,7 +133,7 @@ void general_protection_fault_handler(gp_registers_t * frame){
         frame->rsp,
         frame->ss
     );
-    LogfStr("cpu: %lu", percpu_read(cpu_id));
+    LogfStr(mod, "cpu: %lu", percpu_read(cpu_id));
 
     cpu_stop();
 }
@@ -139,11 +141,11 @@ void general_protection_fault_handler(gp_registers_t * frame){
 
 extern void int_page_fault(void);
 void page_fault_handler(page_fault_regs_t * frame){
-    LogfStr("Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags);
+    LogfStr(mod, "Page fault frame: cs: %llu ec: %llu rip: %llu rflags: %llu \n", frame->cs, frame->error_code, frame->rip, frame->rflags);
     uint64_t cr2 = get_cr2();
-    LogfStr("cr2: %llu \n", cr2);
-    if (frame->cs > 0x31) LogfStr("from userspace ss = %llu rsp = %llu", frame->ss, frame->rsp);
-    LogStr("page fault");
+    LogfStr(mod, "cr2: %llu \n", cr2);
+    if (frame->cs > 0x31) LogfStr(mod, "from userspace ss = %llu rsp = %llu", frame->ss, frame->rsp);
+    LogStr(mod, "page fault");
     cpu_stop();
 }
 
@@ -190,13 +192,13 @@ void RegisterInterruptVector(uint8_t vector, void (*handler)(void), char * name)
 
 
     if (vectors[vector] == true){
-        LogfStr("vector %u used attemped to be registered by %s", vector, name);
+        LogfStr(mod, "vector %u used attemped to be registered by %s", vector, name);
         panic("Vector in use ", STATUS_TAKEN);
     }
 
     idt_set_gate(vector, handler, 0xEE);
 
-    LogfStr("Interrupt vector %u registered succesfully to \"%s\"\n", vector, name);
+    LogfStr(mod, "Interrupt vector %u registered succesfully to \"%s\"\n", vector, name);
 
     release_lock(&iv_lock);
 
@@ -249,7 +251,7 @@ int send_ipi(uint8_t vector, uint32_t ap_id){
            	x2 = false;
 
       	} else {
-       		LogStr("apic disabled\n");
+       		LogStr(mod, "apic disabled\n");
          	return -1;
        }
 

@@ -113,7 +113,7 @@ void kentry(void) {
 
 
 
-    LogfStr("framebuffer %lux%lu pitch=%lu bpp=%u\n",framebuffer_request.response->framebuffers[0]->height,
+    LogfStr("kernel", "framebuffer %lux%lu pitch=%lu bpp=%u\n",framebuffer_request.response->framebuffers[0]->height,
         framebuffer_request.response->framebuffers[0]->width,
         framebuffer_request.response->framebuffers[0]->pitch,
         framebuffer_request.response->framebuffers[0]->bpp);
@@ -133,7 +133,7 @@ void kentry(void) {
                 ap_entry,
                 __ATOMIC_RELEASE
             );
-            LogfStr("sending cpu %i to ap entry\n", i);
+            LogfStr("kernel", "sending cpu %i to ap entry\n", i);
         }
     }
 

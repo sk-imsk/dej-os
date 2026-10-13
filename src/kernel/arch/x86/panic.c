@@ -9,7 +9,7 @@
 #include <dej/panic.h>
 
 
-
+static const char mod[] = "panic";
 struct stack_frame{
     struct stack_frame * next;
     void * ret;
@@ -31,7 +31,7 @@ void draw_screen(void){
 // prints or something
 // uses frame pointer beacuse im not a nerd
 void stack_unwind(void){
-    LogStr("\nStack trace\n");
+    LogStr(mod, "\nStack trace\n");
 
     struct stack_frame * f;
 
@@ -42,7 +42,7 @@ void stack_unwind(void){
 
         if (f->ret == NULL) break;
 
-        LogfStr("%llu \r", f->ret);
+        LogfStr(mod, "%llu \r", f->ret);
 
         f = f->next;
         count++;
@@ -71,7 +71,7 @@ _Noreturn void panic(const char * s, status code){
 
 
 
-    LogStr("Yo panic rn everybody chill yo");
+    LogStr(mod, "Yo panic rn everybody chill yo");
 
     if (ispercpuready()){
         if (percpu_read(cpu_state) &  0x1) {
@@ -85,7 +85,7 @@ _Noreturn void panic(const char * s, status code){
     // to do yo turn off all cpus
 
 
-    LogfStr("\nPanic: %s code %u", s, code);
+    LogfStr(mod, "\nPanic: %s code %u", s, code);
 
 
     draw_screen();
@@ -98,6 +98,6 @@ _Noreturn void panic(const char * s, status code){
 
 
 _Noreturn void fi_panic(const char * cooked){ // like panic but were basically cooked instantly so dont bother with anything fancy
-    LogStr(cooked); // we cooked gng
+    LogStr(mod, cooked); // we cooked gng
     triple_fault();
 }

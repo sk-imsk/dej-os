@@ -70,12 +70,12 @@ _Noreturn void jump_to_watchdog(void){
 			}
 
 			if (curr_watchdog->anger >= 200) {
-				LogfStr("dog: cpu %u is not responding \n", *id);
+				LogfStr("dog:", "cpu %u is not responding \n", *id);
 				panic("cpu not responding", STATUS_LOCKUP);
 			}
 
 			if (curr_watchdog->anger > 100){
-				LogfStr("Dog: cpu %i not responding will take action if still uncorrected (anger = %u)\n", *id, curr_watchdog->anger);
+				LogfStr("Dog:", "cpu %i not responding will take action if still uncorrected (anger = %u)\n", *id, curr_watchdog->anger);
 			}
 			i++;
 		}

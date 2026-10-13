@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <x86/x86.h>
 
+static const char mod[] = "kernel";
 typedef struct {
     // General-purpose registers (pushed manually by assembly)
     uint64_t rax, rcx, rdx, rbx, rbp, rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15;
@@ -67,12 +68,12 @@ extern _Atomic uint64_t temperature;
 extern void int_nmi(void);
 void nmi_handler(nmi_registers_t * regs){
 
-    LogfStr("NMI address = %p RAX = %p \n\n",regs->rip , regs->rax);
+    LogfStr(mod, "NMI address = %p RAX = %p \n\n",regs->rip , regs->rax);
 
     uint64_t res = check_severity();
     if (res == 0) return; // we good yo
     if (res == 1 && !(is_bsp())){
-        LogStr("\n NMI on non bsp core killing it \n");
+        LogStr(mod, "\n NMI on non bsp core killing it \n");
         atomic_exchange(&temperature, 999999);
         res = rdmsr(MSR_IA32_MCG_STATUS);
         res &= ~(1ULL << 2);
@@ -85,19 +86,19 @@ void nmi_handler(nmi_registers_t * regs){
     //
     uint32_t num_banks = rdmsr(0x179) & 0xFF;
 
-    LogStr("--- MCA BANK LOGS ---\n");
+    LogStr(mod, "--- MCA BANK LOGS ---\n");
         for (uint32_t i = 0; i < num_banks; i++) {
             uint64_t bank_status = rdmsr(0x401 + (i * 4)); // MCx_STATUS
 
             // If Bit 63 (Valid) is set, this bank has our crime scene data
             if (bank_status & (1ULL << 63)) {
-                LogfStr("Bank %i :", i);
-                LogfStr(" STATUS = %llu \n", bank_status);
+                LogfStr(mod, "Bank %i :", i);
+                LogfStr(mod, " STATUS = %llu \n", bank_status);
 
                 // Bit 59: Address Valid (ADDRV) -> If set, fetch the physical address
                 if (bank_status & (1ULL << 59)) {
                     uint64_t bank_addr = rdmsr(0x402 + (i * 4)); // MCx_ADDR
-                    LogfStr("  PHYS ADDR = %llu \n", bank_addr);
+                    LogfStr(mod, "  PHYS ADDR = %llu \n", bank_addr);
                 }
             }
         }

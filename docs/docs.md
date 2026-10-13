@@ -7,7 +7,7 @@ also my bros graphics is pretty good he is a serious bro so count on him instead
 
 ### sil 
 
-sil is basically irql but tuffer (its the exact same)
+sil is basically irql but tuffer (its the exact same (but tuffer))
 
 ### gfx
 

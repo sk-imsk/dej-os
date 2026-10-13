@@ -45,7 +45,7 @@ all: kernel
 kernel: $(KERNEL)
 
 
-$(KERNEL): always $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/linker.ld
+$(KERNEL): always $(C_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/linker.ld
 	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS)
 
 
@@ -55,9 +55,6 @@ $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CCFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.asm
-	@mkdir -p $(dir $@)
-	$(ASM) -f elf64 $< -o $@
 
 $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.S
 	@mkdir -p $(dir $@)
