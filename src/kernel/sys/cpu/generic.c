@@ -15,7 +15,7 @@
 #include <x86/tss.h>
 
 
-
+static const char mod[] = "kernel";
 /*
  *  irq is basically like which interrupt is being handled
  * sil is interrupt level to like mask stuff
@@ -45,7 +45,7 @@ void ap_entry(struct limine_mp_info *cpu){
 
 
     if (percpu_size >= 4096){
-        LogfStr("percpu size = %u", percpu_size);
+        LogfStr(mod, "percpu size = %u", percpu_size);
         panic("percpu tables too big prob like something wrong or ill fix it later or something\n", STATUS_UNKNOWN);                // todo replace with recovery or something
     }
 
@@ -68,7 +68,7 @@ void ap_entry(struct limine_mp_info *cpu){
     cpu_enable_interrupts();
     percpu_write(sil, 0);       // enable all interrupts
 
-    LogfStr("enabling cpu %i \n", my_core);
+    LogfStr(mod, "enabling cpu %i \n", my_core);
 
     switch (my_core) {
         case 1: {
@@ -85,7 +85,7 @@ void ap_entry(struct limine_mp_info *cpu){
         }
     }
 
-    LogfStr("core %lu returned halting on core\n", percpu_read(cpu_id));
+    LogfStr(mod, "core %lu returned halting on core\n", percpu_read(cpu_id));
     percpu_write(sil, 10);
     percpu_write(cpu_state, 0x1);
     cpu_stop();

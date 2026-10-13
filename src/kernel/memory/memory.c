@@ -6,6 +6,8 @@
 #include <dej/sil.h>
 #include <x86/tss.h>
 
+static const char mod[] = "memory";
+
 #define USER_CODE  0x400000
 #define USER_STACK 0x800000
 static uint64_t pages = 0;
@@ -65,8 +67,8 @@ int memory_init(struct limine_memmap_response * memmap, struct limine_hhdm_respo
                 // basically i aint gonna use yet but later sure
                 break;
             case LIMINE_MEMMAP_BAD_MEMORY:
-                LogfStr("Bad memory at %llu \n", memmap->entries[i]->base);
-                LogfStr("Length %llu \r\n", memmap->entries[i]->length);
+                LogfStr(mod, "Bad memory at %llu \n", memmap->entries[i]->base);
+                LogfStr(mod, "Length %llu \r\n", memmap->entries[i]->length);
                 break;
             case LIMINE_MEMMAP_ACPI_NVS:
                 break;

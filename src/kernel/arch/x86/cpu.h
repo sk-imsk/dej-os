@@ -26,7 +26,7 @@ static inline _Noreturn void cpu_stop(void){
 
 static inline void check_watchdog() {
     if (x86_inb(0x92) == 4) {
-        LogStr("Last system failure caused by watchdog");
+        LogStr("kernel", "Last system failure caused by watchdog");
         __asm__ volatile (
             "in $0x92, %%al\n\t"
             "and $0xfb, %%al\n\t"
