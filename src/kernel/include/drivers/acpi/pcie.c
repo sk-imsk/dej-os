@@ -5,6 +5,7 @@
 #include "pcie.h"
 #include <dej/memory.h>
 
+
 #define PCI_VENDOR_ID   0x00
 #define PCI_DEVICE_ID   0x02
 #define PCI_BAR 0x10
@@ -82,7 +83,8 @@ uint64_t pci_read_bar(
 
 
 void get_driver(void){
-	struct pci_device ret;
+
+	device_t probe_device;
 	for (uint16_t bus = 0; bus < 256; bus++){
 		for (uint8_t device = 0; device < 32; device++) {
     			for (uint8_t function = 0; function < 8; function++) {
@@ -90,34 +92,19 @@ void get_driver(void){
 
        				volatile uint8_t * cfg = pci_config(bus, device, function);
 
+           			uint16_t vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
+
+              			if (vendor_id == 0xFFFF) continue;
 
 
-         			ret.vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
 
 
-          			if (ret.vendor_id == 0xffff)
-              			continue;
-
-            			ret.device_id = *(volatile uint16_t *)(cfg + PCI_DEVICE_ID);
-
-              			ret.class = *(volatile uint8_t *)(cfg + PCI_CLASS);
-
-                		ret.subclass = *(volatile uint8_t *)(cfg + PCI_SUBCLASS);
-
-                 		ret.prog_if = *(volatile uint8_t *)(cfg + PCI_PROGIF);
-
-                  		ret.header_type = *(volatile uint8_t *)(cfg + PCI_HEADER_TYPE);
 
 
-                      		for (int i = 0; i < 6; i++) {
-                        		ret.bar[i] = pci_read_bar(bus, device,function, i);
-                        	}
+                      		for (int i = 0; i < driver_count; i++){
+                        		if (registered_drivers[i]->probe(&probe_device)){
 
-
-                    		// find driver or something
-                      		if (ret.class == 4 && ret.subclass == 3){
-                       			sound_dev = ret;
-                         		LogfStr("Sound device found\n");
+                          		}
                         	}
 
 

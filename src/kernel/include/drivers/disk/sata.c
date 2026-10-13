@@ -4,11 +4,11 @@
 
 
 
-static bool attach(device_t * dev){
+static bool attach(device_t * dev __unused){
 	return true;
 }
 
-static bool detach(device_t * dev){
+static bool detach(device_t * dev __unused){
 	return true;
 }
 

@@ -1,1 +1,1 @@
-void parse_acpi_earlyboot(void);
+void parse_acpi(void);

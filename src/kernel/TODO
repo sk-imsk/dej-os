@@ -1,8 +1,9 @@
-1. set up disk drivers
-2. get userspace back up
-3. make memory good and ban kgetpage bc lowk kinda boring
-4. play ocean dih
-5. fix security issues
-6. print text to le screen
-7. add a driver system which is tuff
-8. make userspace good instead of bad
+1. add a driver system which is tuff
+2. make logging better
+3. set up disk drivers
+4. get userspace back up
+5. make memory good and ban kgetpage bc lowk kinda boring
+6. play ocean dih
+7. fix security issues
+8. print text to le screen
+9. make userspace good instead of bad

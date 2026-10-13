@@ -107,9 +107,9 @@ void kentry(void) {
     InterruptInit();
     memory_init(memmap_request.response, hhdm_request.response);
     virtual_memory_init();
-    parse_acpi_earlyboot();
     user_space_init();
     check_watchdog();
+    parse_acpi();
 
 
 

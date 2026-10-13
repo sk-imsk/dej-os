@@ -1,4 +1,5 @@
 #include <dej/driver.h>
+#include "../acpi/pcie.h"
 
 #define HDA_GCAP   0x00
 #define HDA_GCTL   0x08

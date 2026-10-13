@@ -1,3 +1,4 @@
+#pragma once
 #include <dej/kernel.h>
 
 typedef enum {
@@ -37,6 +38,11 @@ typedef struct driver {
 
 
 } driver_t;
+
+#define MAX_DRIVERS 128
+
+extern driver_t * registered_drivers[MAX_DRIVERS];
+extern int driver_count;
 
 
 

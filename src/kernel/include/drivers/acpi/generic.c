@@ -104,7 +104,7 @@ static void parse_acpi_earlyboot_rev2(struct XSDP_t * rsdp __unused){
 }
 
 
-void parse_acpi_earlyboot(void){
+void parse_acpi(void){
     struct RSDP_t * rsdP = rsdp_request.response->address;            // temp before we figure out which one it is
 
     if (rsdP->Revision > 1) {
