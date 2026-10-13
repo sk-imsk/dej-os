@@ -6,6 +6,7 @@
 #include <dej/limine.h>
 #include "hda.h"
 
+static const char mod[] = "generic hda";
 static inline always_inline uint64_t virt2phys(void * addr){
     return (uint64_t)(addr - hhdm_request.response->offset);
 }
@@ -20,7 +21,7 @@ int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 	}
 
 
-	LogStr("Reseting hda controller\n");
+	LogStr(mod, "Reseting hda controller\n");
 
 	*gctl &= ~HDA_GCTL_CRST;
 
@@ -28,7 +29,7 @@ int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 
 	while ((*gctl & HDA_GCTL_CRST) != 0) {
 		if (--timeout == 0){
-			LogStr("hda failed to reset (stuck on ) \n");
+			LogStr(mod, "hda failed to reset (stuck on ) \n");
 			return ENXIO;
 		}
 		delay(10);
@@ -45,7 +46,7 @@ int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 
 	while ((*gctl & HDA_GCTL_CRST) == 0) {
 		if (--timeout == 0){
-			LogStr("hda failed to turn back on\n");
+			LogStr(mod, "hda failed to turn back on\n");
 			return ENXIO;
 		}
 		delay(10);
@@ -88,7 +89,7 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 
 	while (!(mmio_read16(mmio + HDA_CORBRP) & 0x8000)) {
 		if (--timeout == 0){
-			LogStr("corbrp failed to move to the start\n");
+			LogStr(mod, "corbrp failed to move to the start\n");
 			return ENXIO;
 		}
 		delay(10);
@@ -102,7 +103,7 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 	mmio_write8(mmio + HDA_CORBCTL, 0x02);
 	mmio_write8(mmio + HDA_RIRBCTL, 0x02);
 
-	LogStr("corbrp reset succesfully\n");
+	LogStr(mod, "corbrp reset succesfully\n");
 
 	return 0;
 }

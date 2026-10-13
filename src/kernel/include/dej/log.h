@@ -11,8 +11,6 @@
  * want this to need to be inited so here we go
  */
 
-void LogStr(const char * s);
-void LogfStr(const char * s, ...);
-void LogStrEarly(const char *s);
-void LogfStrEarly(const char * s, ...);
+void LogStr(const char * module, const char * s);
+void LogfStr(const char * module, const char * s, ...);
 void LogRaw(void * buffer, size_t len);

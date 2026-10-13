@@ -3,6 +3,7 @@
 #include <x86/tss.h>
 
 
+static const char mod[] = "kernel";
 struct tss_descriptor {
     uint16_t limit_low;
     uint16_t base_low;
@@ -28,8 +29,8 @@ void write_tss_descriptor(void) {
 
 
     if (percpu_tss == NULL) {
-        LogStr("percpu_tss = null");
-        LogfStr("cpuid = %llu", percpu_read(cpu_id));
+        LogStr(mod, "percpu_tss = null");
+        LogfStr(mod, "cpuid = %llu", percpu_read(cpu_id));
         cpu_stop();
     }
     tss_entry_t * tss_desc = &percpu_tss->tss;

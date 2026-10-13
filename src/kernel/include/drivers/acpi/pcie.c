@@ -13,6 +13,7 @@
 #define PCI_PROGIF      0x09
 #define PCI_HEADER_TYPE 0x0E
 
+static const char mod[] = "acpi";
 
 extern struct pci_device sound_dev;
 
@@ -117,7 +118,7 @@ void get_driver(void){
                     		// find driver or something
                       		if (ret.class == 4 && ret.subclass == 3){
                        			sound_dev = ret;
-                         		LogfStr("Sound device found\n");
+                         		LogfStr(mod, "Sound device found\n");
                         	}
 
 
@@ -145,10 +146,10 @@ void mcfg_enter(void * mcfg ){
     for (size_t i = 0; i < entry_count; i++){
         MCFG_entry_t * entry = &mh->entries[i];
 
-        LogfStr("MCFG entry %u : \n", i);
-        LogfStr("base: %p \n", (void *)entry->base_address);
-        LogfStr("segment:  %u \n", entry->segment_group);
-        LogfStr("Buses : %u-%u \n", entry->start_bus, entry->end_bus);
+        LogfStr(mod, "MCFG entry %u : \n", i);
+        LogfStr(mod, "base: %p \n", (void *)entry->base_address);
+        LogfStr(mod, "segment:  %u \n", entry->segment_group);
+        LogfStr(mod, "Buses : %u-%u \n", entry->start_bus, entry->end_bus);
     }
 
 

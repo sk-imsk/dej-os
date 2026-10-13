@@ -6,7 +6,7 @@
 #include "generic.h"
 #include "pcie.h"
 
-
+static const char mod[] = "acpi";
 
 // types and stuff
 struct RSDP_t {
@@ -67,12 +67,12 @@ static void *find_x(struct RSDT *rsdt, const char * s)
 
 static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
 
-    LogStr("Reading acpi1 tables \n");
+    LogStr(mod, "Reading acpi1 tables \n");
 
     if (!(check_rsdpsum(rsdp))){
         panic("rsdp invalid", STATUS_HARDWARE_FAILURE);
     }
-    LogStr("Found acpi rsdp \n");
+    LogStr(mod, "Found acpi rsdp \n");
 
 
     struct RSDT * rsdt = (struct RSDT *)(phys2virt32(rsdp->RsdtAddress));
@@ -81,14 +81,14 @@ static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
     panic("rsdt invalid", STATUS_HARDWARE_FAILURE);
     }
 
-    LogStr("Found valid rsdt\n");
+    LogStr(mod, "Found valid rsdt\n");
 
 
     void * mcfg = find_x(rsdt, "MCFG");
     if (mcfg != NULL){
         mcfg_enter(mcfg);
     } else {
-        LogStr("Failed to find MCFG\n");
+        LogStr(mod, "Failed to find MCFG\n");
     }
 
 
@@ -100,7 +100,7 @@ static void parse_acpi_earlyboot_rev1(struct RSDP_t * rsdp){
 }
 
 static void parse_acpi_earlyboot_rev2(struct XSDP_t * rsdp __unused){
-    LogStr("using revision more than 2");
+    LogStr(mod, "using revision more than 2");
 }
 
 
