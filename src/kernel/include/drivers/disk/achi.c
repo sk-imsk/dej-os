@@ -5,7 +5,9 @@
 static const char mod[] = "generic achi";
 
 static bool attach(device_t * dev __unused){
-	LogStr(mod,"Attached successfully\n");
+	for (int i = 0; i < 10; i++){
+		LogStr(mod, "I will not write bad code\n");
+	}
 	return true;
 }
 
@@ -22,7 +24,7 @@ static bool probe(device_t * dev){
 	}
 
 	if (pci->class == 0x01 && pci->subclass == 0x06 && pci->prog_if == 0x00){
-		LogStr(mod, "ahci device is not normal (banned)\n");
+		LogStr(mod, "ahci device is not normal (banned)(prog if = 0) \n");
 		return false;
 	}
 
