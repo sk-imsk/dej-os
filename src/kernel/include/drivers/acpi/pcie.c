@@ -146,7 +146,7 @@ void get_drivers(void){
                              			}
                           		}
                         	}
-                        	if (!driver) LogfStr(mod, "Couldent find a driver for class %x subclass %x\n", probe_pci.class, probe_pci.subclass);
+                        	if (!driver) LogfStr(mod, "Couldn't find a driver for class %x subclass %x\n", probe_pci.class, probe_pci.subclass);
 
 
             		}
