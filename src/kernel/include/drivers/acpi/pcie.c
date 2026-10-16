@@ -107,6 +107,22 @@ device_type_t getdevtype(uint8_t class, uint8_t sub){
 	}
 }
 
+void get_bars(struct pci_device * p, uint16_t bus, uint8_t device, uint8_t function){
+	for (uint8_t bar_num = 0; bar_num < 6; bar_num++) {
+     		volatile uint8_t *config = pci_config(bus, device, function);
+      		uint32_t low = *(volatile uint32_t *)(config + 0x10 + bar_num * 4);
+
+      		// banned
+      		if (low == 0) continue;
+
+
+        	uint64_t bar_address = pci_read_bar(bus, device, function, bar_num);
+
+
+        	p->bar[bar_num] = bar_address;
+	}
+}
+
 void get_drivers(void){
 
 	device_t probe_device;
@@ -131,7 +147,7 @@ void get_drivers(void){
                            	probe_pci.device_id = *(volatile uint16_t *)(cfg + PCI_DEVICE_ID);
                             	probe_pci.prog_if = *(volatile uint16_t *)(cfg + PCI_PROGIF);
                              	probe_pci.header_type = *(volatile uint16_t *)(cfg + PCI_HEADER_TYPE);
-                              	probe_pci.bar[0] = 0x00;
+                              	get_bars(&probe_pci, bus, device, function);
 
 
                  		probe_device.type = getdevtype(probe_pci.class, probe_pci.subclass);
