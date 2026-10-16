@@ -284,7 +284,7 @@ void * map_mmio(uint64_t phys){
 void * u_buf;
 uint64_t user_cr3;
 static address_space_t user_as;
-void user_space_init(void){
+void __dih user_space_init(void){
 
 
     user_as.pml4_phys = __giverawpage();

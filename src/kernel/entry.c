@@ -10,6 +10,7 @@
 #include <dej/percpu.h>
 #include <dej/kernel.h>
 #include <dej/sil.h>
+#include <dej/driver.h>
 
 extern _Noreturn void kmain(void);
 extern void ap_entry(struct limine_mp_info *cpu);
@@ -109,6 +110,7 @@ void kentry(void) {
     virtual_memory_init();
     user_space_init();
     check_watchdog();
+    load_drivers();
     parse_acpi();
 
 

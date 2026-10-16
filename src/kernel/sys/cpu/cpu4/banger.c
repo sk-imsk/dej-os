@@ -22,6 +22,11 @@ struct pci_device sound_dev = {0};
 
 _Noreturn void sound_entry(){
 
+	LogStr(mod, "Banger not finished halting\n");
+	cpu_stop();
+
+	__builtin_unreachable();
+
 	LogfStr(mod, "Audio device found vendor id = %lu device id = %lu \n", sound_dev.vendor_id, sound_dev.device_id);
 
 	volatile uint64_t mmio_raw = sound_dev.bar[0];

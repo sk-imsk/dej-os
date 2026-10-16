@@ -13,7 +13,9 @@
 #define unlikely(x) __builtin_expect(!!(x), false)
 #define always_inline __attribute__((always_inline))
 #define __unused   __attribute__((unused))
-
+#define __weak __attribute__((weak))
+#define __dih __attribute__((cold))
+#define __hot __attribute__((hot))
 
 #define KiB(x) (x) * 1024
 #define KB(x) (x) * 1000

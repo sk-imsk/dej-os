@@ -37,7 +37,7 @@ typedef struct {
 }__attribute__((packed)) buffers_t;
 
 
-
+void hda_init(void);
 int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl);
 uint16_t hda_getring_size(uint8_t caps);
 int sound_init(buffers_t * buf, struct pci_device * dev,  volatile uint8_t * mmio);

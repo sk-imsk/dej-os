@@ -82,10 +82,35 @@ uint64_t pci_read_bar(
 }
 
 
+device_type_t getdevtype(uint8_t class, uint8_t sub){
+	switch (class){
+		case 0x01:
+			return DEV_TYPE_CONTROLLER;
+		case 0x02:
+			return DEV_TYPE_CONTROLLER;
+		case 0x03:
+			return DEV_TYPE_CONTROLLER;
+		case 0x04:
+			return 	DEV_TYPE_CONTROLLER;
+		case 0x0C: {
+			if (sub == 0x03) return DEV_TYPE_CONTROLLER;
+			return DEV_TYPE_BUS;
+		}
+		case 0x06:
+			return DEV_TYPE_BUS;
+		case 0x09:
+			return DEV_TYPE_INPUT;
+		default:
+			LogfStr(mod, "Couldent find a device type for class = %x subclass = %x \n", class, sub);
+			return DEV_TYPE_CONTROLLER;
 
-void get_driver(void){
+	}
+}
+
+void get_drivers(void){
 
 	device_t probe_device;
+	struct pci_device probe_pci;
 	for (uint16_t bus = 0; bus < 256; bus++){
 		for (uint8_t device = 0; device < 32; device++) {
     			for (uint8_t function = 0; function < 8; function++) {
@@ -97,16 +122,31 @@ void get_driver(void){
 
               			if (vendor_id == 0xFFFF) continue;
 
+                 		probe_pci.class = *(volatile uint16_t *)(cfg + PCI_CLASS);
+                   		probe_pci.subclass = *(volatile uint16_t *)(cfg + PCI_SUBCLASS);
+                     		probe_pci.bus = bus;
+                       		probe_pci.device = device;
+                         	probe_pci.function = function;
+                          	probe_pci.vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
+                           	probe_pci.device_id = *(volatile uint16_t *)(cfg + PCI_DEVICE_ID);
+                            	probe_pci.prog_if = *(volatile uint16_t *)(cfg + PCI_PROGIF);
+                             	probe_pci.header_type = *(volatile uint16_t *)(cfg + PCI_HEADER_TYPE);
+                              	probe_pci.bar[0] = 0x00;
 
 
+                 		probe_device.type = getdevtype(probe_pci.class, probe_pci.subclass);
+                     		probe_device.device = probe_pci;
 
-
-
+                       		bool driver = false;
                       		for (int i = 0; i < driver_count; i++){
                         		if (registered_drivers[i]->probe(&probe_device)){
-
+                          			if (registered_drivers[i]->attach(&probe_device)) {
+                             				driver = true;
+                             				continue;
+                             			}
                           		}
                         	}
+                        	if (!driver) LogfStr(mod, "Couldent find a driver for class %x subclass %x\n", probe_pci.class, probe_pci.subclass);
 
 
             		}
@@ -140,7 +180,7 @@ void mcfg_enter(void * mcfg ){
     }
 
 
-    get_driver();
+    get_drivers();
 
 
 }

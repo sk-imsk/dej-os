@@ -1,5 +1,6 @@
 #pragma once
 #include <dej/kernel.h>
+#include <drivers/acpi/pcie.h>
 
 typedef enum {
     DEV_TYPE_ROOT,
@@ -19,9 +20,9 @@ typedef struct device {
     struct device * first_child;
     struct device * next_sibling;
 
-    void * bus_context;
 
-   struct driver * driver;
+    struct pci_device device;
+    struct driver * driver;
 
 }device_t;
 
@@ -47,3 +48,4 @@ extern int driver_count;
 
 
 void RegisterDriver(driver_t * driver);
+void load_drivers(void);
