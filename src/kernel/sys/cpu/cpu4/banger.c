@@ -22,7 +22,7 @@ struct pci_device sound_dev = {0};
 
 _Noreturn void sound_entry(){
 
-	LogStr(mod, "Banger not finished halting\n");
+	LogStr(mod, "Time out.\n");
 	cpu_stop();
 
 	__builtin_unreachable();
