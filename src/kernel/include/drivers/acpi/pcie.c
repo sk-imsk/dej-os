@@ -5,6 +5,7 @@
 #include "pcie.h"
 #include <dej/memory.h>
 
+
 #define PCI_VENDOR_ID   0x00
 #define PCI_DEVICE_ID   0x02
 #define PCI_BAR 0x10
@@ -81,9 +82,35 @@ uint64_t pci_read_bar(
 }
 
 
+device_type_t getdevtype(uint8_t class, uint8_t sub){
+	switch (class){
+		case 0x01:
+			return DEV_TYPE_CONTROLLER;
+		case 0x02:
+			return DEV_TYPE_CONTROLLER;
+		case 0x03:
+			return DEV_TYPE_CONTROLLER;
+		case 0x04:
+			return 	DEV_TYPE_CONTROLLER;
+		case 0x0C: {
+			if (sub == 0x03) return DEV_TYPE_CONTROLLER;
+			return DEV_TYPE_BUS;
+		}
+		case 0x06:
+			return DEV_TYPE_BUS;
+		case 0x09:
+			return DEV_TYPE_INPUT;
+		default:
+			LogfStr(mod, "Couldent find a device type for class = %x subclass = %x \n", class, sub);
+			return DEV_TYPE_CONTROLLER;
 
-void get_driver(void){
-	struct pci_device ret;
+	}
+}
+
+void get_drivers(void){
+
+	device_t probe_device;
+	struct pci_device probe_pci;
 	for (uint16_t bus = 0; bus < 256; bus++){
 		for (uint8_t device = 0; device < 32; device++) {
     			for (uint8_t function = 0; function < 8; function++) {
@@ -91,35 +118,35 @@ void get_driver(void){
 
        				volatile uint8_t * cfg = pci_config(bus, device, function);
 
+           			uint16_t vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
+
+              			if (vendor_id == 0xFFFF) continue;
+
+                 		probe_pci.class = *(volatile uint16_t *)(cfg + PCI_CLASS);
+                   		probe_pci.subclass = *(volatile uint16_t *)(cfg + PCI_SUBCLASS);
+                     		probe_pci.bus = bus;
+                       		probe_pci.device = device;
+                         	probe_pci.function = function;
+                          	probe_pci.vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
+                           	probe_pci.device_id = *(volatile uint16_t *)(cfg + PCI_DEVICE_ID);
+                            	probe_pci.prog_if = *(volatile uint16_t *)(cfg + PCI_PROGIF);
+                             	probe_pci.header_type = *(volatile uint16_t *)(cfg + PCI_HEADER_TYPE);
+                              	probe_pci.bar[0] = 0x00;
 
 
-         			ret.vendor_id = *(volatile uint16_t *)(cfg + PCI_VENDOR_ID);
+                 		probe_device.type = getdevtype(probe_pci.class, probe_pci.subclass);
+                     		probe_device.device = probe_pci;
 
-
-          			if (ret.vendor_id == 0xffff)
-              			continue;
-
-            			ret.device_id = *(volatile uint16_t *)(cfg + PCI_DEVICE_ID);
-
-              			ret.class = *(volatile uint8_t *)(cfg + PCI_CLASS);
-
-                		ret.subclass = *(volatile uint8_t *)(cfg + PCI_SUBCLASS);
-
-                 		ret.prog_if = *(volatile uint8_t *)(cfg + PCI_PROGIF);
-
-                  		ret.header_type = *(volatile uint8_t *)(cfg + PCI_HEADER_TYPE);
-
-
-                      		for (int i = 0; i < 6; i++) {
-                        		ret.bar[i] = pci_read_bar(bus, device,function, i);
+                       		bool driver = false;
+                      		for (int i = 0; i < driver_count; i++){
+                        		if (registered_drivers[i]->probe(&probe_device)){
+                          			if (registered_drivers[i]->attach(&probe_device)) {
+                             				driver = true;
+                             				continue;
+                             			}
+                          		}
                         	}
-
-
-                    		// find driver or something
-                      		if (ret.class == 4 && ret.subclass == 3){
-                       			sound_dev = ret;
-                         		LogfStr(mod, "Sound device found\n");
-                        	}
+                        	if (!driver) LogfStr(mod, "Couldn't find a driver for class %x subclass %x\n", probe_pci.class, probe_pci.subclass);
 
 
             		}
@@ -153,7 +180,7 @@ void mcfg_enter(void * mcfg ){
     }
 
 
-    get_driver();
+    get_drivers();
 
 
 }

@@ -107,3 +107,27 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 
 	return 0;
 }
+
+
+bool probe(device_t * d){
+	if (d->device.class == 4 && d->device.subclass == 3) return true;
+	return false;
+}
+bool attach(device_t * d __unused){
+	LogStr(mod, "Attached to device\n");
+	return true;
+}
+bool detach(device_t *d __unused) {
+	return true;
+}
+
+static driver_t driver = {
+	.name = mod,
+	.probe = probe,
+	.attach = attach,
+	.detach = detach
+};
+
+void hda_init(void){
+	RegisterDriver(&driver);
+}
