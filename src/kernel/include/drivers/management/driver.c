@@ -1,7 +1,7 @@
 #include <dej/kernel.h>
 #include <dej/log.h>
 #include "device.h"
-#include "../disk/achi.h"
+#include "../disk/ahci.h"
 #include "../hda/hda.h"
 
 

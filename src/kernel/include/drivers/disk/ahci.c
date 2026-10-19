@@ -3,7 +3,7 @@
 #include <dej/log.h>
 #include <dej/memory.h>
 #include <dej/sleep.h>
-#include "achi.h"
+#include "ahci.h"
 
 static const char mod[] = "generic ahci";
 static volatile void * mmio;
