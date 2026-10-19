@@ -2,17 +2,13 @@
 #include <dej/driver.h>
 #include <dej/log.h>
 #include <dej/memory.h>
+#include <dej/sleep.h>
 #include "achi.h"
 
 static const char mod[] = "generic ahci";
 static volatile void * mmio;
 
 #define abar 5
-
-static void sleep_bad(uint32_t ms){
-	for (volatile uint64_t i = 0; i < (uint64_t)ms * 100000; i++)
-		__asm__ volatile("pause");
-}
 
 static int turn_off_port(int i){
 	uint32_t new  = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
@@ -32,7 +28,7 @@ static int turn_off_port(int i){
 
 		if (!(new & AHCI_PXCMD_CR)) break;
 
-		sleep_bad(1);
+		sleep_ms(1);
 	}
 	if (timeout == 0) return -1;
 
@@ -44,7 +40,7 @@ static int turn_off_port(int i){
 
 		if (!(new & AHCI_PXCMD_FR)) break;
 
-		sleep_bad(1);
+		sleep_ms(1);
 	}
 	if (timeout == 0) return -1;
 

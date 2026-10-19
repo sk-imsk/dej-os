@@ -11,12 +11,7 @@
 #include <dej/cpu.h>
 #include <dej/panic.h>
 #include <dej/interrupt.h>
-
-static void delay_bad(uint32_t v){
-	while (v--){
-		cpu_takebreak();
-	}
-}
+#include <dej/sleep.h>
 
 
 void watchdog_handler(void){
@@ -61,7 +56,7 @@ _Noreturn void jump_to_watchdog(void){
 
 			send_ipi(0x30, *id);
 
-			delay_bad(100);
+			sleep_short(100);
 
 			if (!atomic_load(&curr_watchdog->here))
 				curr_watchdog->anger += (curr_watchdog->is_having_hard_time) ? 1 : 10;
@@ -80,7 +75,7 @@ _Noreturn void jump_to_watchdog(void){
 			i++;
 		}
 
-		delay_bad(1000000); 		// give them a break
+		sleep_ms(100); 		// give them a break
 
 
 
