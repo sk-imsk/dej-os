@@ -7,9 +7,16 @@
 
 static const char mod[] = "generic ahci";
 static volatile void * mmio;
+static int usable_ports = 0;
 
 #define abar 5
 
+
+static int turn_on_port(int i){
+	uint32_t new = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
+
+	return 0;
+}
 static int turn_off_port(int i){
 	uint32_t new  = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
 
@@ -56,7 +63,14 @@ static int wake_up_ports(uint32_t ports){
 
 			if (res){
 				LogfStr(mod, "failed to turn off port %i ", i);
-				return res;
+
+			}
+
+			res = turn_on_port(i);
+
+			if (res){
+				LogfStr(mod, "failed to turn on port %i", i);
+
 			}
 
 		}
@@ -71,6 +85,7 @@ static bool attach(device_t * dev){
 	mmio = map_mmio(dev->device.bar[abar]);
 
 	uint32_t ports = mmio_read32(mmio + AHCI_PI);
+	usable_ports = ports;
 
 	int res = wake_up_ports(ports);
 
