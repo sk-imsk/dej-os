@@ -13,7 +13,7 @@ static int usable_ports = 0;
 
 
 static int turn_on_port(int i){
-	uint32_t new = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
+	// uint32_t new = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
 
 	return 0;
 }
