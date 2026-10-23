@@ -27,3 +27,4 @@ void * KGetPage(void);
 void retpage(void * ptr);
 void __dih user_space_init(void);
 void load_gdt(void);
+void * dma_alloc(uint64_t size);

@@ -278,7 +278,7 @@ static uint64_t offst = 0;
 void * map_mmio(uint64_t phys){
 	map_page(&newpml4, MMIO_BASE + offst, phys, PAGE_NX | PAGE_PRESENT | PAGE_WRITE);
 	offst += PAGE_SIZE;
-	return (void *)MMIO_BASE + offst - PAGE_SIZE; // because we incremented it for next time we gotta subtrace (gcc will optimise or sum prob)
+	return (void *)MMIO_BASE + offst - PAGE_SIZE; // because we incremented it for next time we gotta subtract (gcc will optimise or sum prob)
 }
 
 void * u_buf;

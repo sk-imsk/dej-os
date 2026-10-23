@@ -4,6 +4,7 @@
 #include <dej/log.h>
 #include <drivers/acpi/pcie.h>
 #include <dej/limine.h>
+#include <dej/sleep.h>
 #include "hda.h"
 
 static const char mod[] = "generic hda";
@@ -11,9 +12,6 @@ static inline always_inline uint64_t virt2phys(void * addr){
     return (uint64_t)(addr - hhdm_request.response->offset);
 }
 
-static inline void delay(uint32_t d){
-	while (d--) cpu_takebreak();
-}
 
 int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 	if (dev->vendor_id != 0x8086){
@@ -32,10 +30,10 @@ int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 			LogStr(mod, "hda failed to reset (stuck on ) \n");
 			return ENXIO;
 		}
-		delay(10);
+		sleep_short(10);
 	}
 
-	delay(1000);
+	sleep_short(1000);
 
 	*gctl |= HDA_GCTL_CRST;			// turn back on
 
@@ -49,12 +47,12 @@ int sound_dev_reset(struct pci_device * dev, volatile uint32_t * gctl){
 			LogStr(mod, "hda failed to turn back on\n");
 			return ENXIO;
 		}
-		delay(10);
+		sleep_short(10);
 	}
 
 
 
-	delay(1000);
+	sleep_short(1000);
 
 
 	return 0;
@@ -92,7 +90,7 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 			LogStr(mod, "corbrp failed to move to the start\n");
 			return ENXIO;
 		}
-		delay(10);
+		sleep_short(10);
 	}
 
 
@@ -109,15 +107,15 @@ int sound_init(buffers_t * buf, struct pci_device * dev, volatile uint8_t * mmio
 }
 
 
-bool probe(device_t * d){
+static bool probe(device_t * d){
 	if (d->device.class == 4 && d->device.subclass == 3) return true;
 	return false;
 }
-bool attach(device_t * d __unused){
+static bool attach(device_t * d __unused){
 	LogStr(mod, "Attached to device\n");
 	return true;
 }
-bool detach(device_t *d __unused) {
+static bool detach(device_t *d __unused) {
 	return true;
 }
 
