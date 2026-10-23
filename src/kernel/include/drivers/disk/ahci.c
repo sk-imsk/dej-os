@@ -12,7 +12,7 @@ static int usable_ports = 0;
 #define abar 5
 
 
-static int turn_on_port(int i){
+static int turn_on_port(int i __unused){
 	// uint32_t new = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
 
 	return 0;
@@ -32,10 +32,6 @@ static int turn_off_port(int i){
 
 	while (timeout--){
 		new = mmio_read32(mmio + AHCI_PORT_BASE(i) + AHCI_PxCMD);
-
-		if (!(new & AHCI_PXCMD_CR)) break;
-
-		sleep_ms(1);
 	}
 	if (timeout == 0) return -1;
 
