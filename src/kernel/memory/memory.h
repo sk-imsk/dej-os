@@ -25,5 +25,5 @@ int virtual_memory_init(void);
 void * map_mmio(uint64_t phys);
 void * KGetPage(void);
 void retpage(void * ptr);
-void user_space_init(void);
+void __dih user_space_init(void);
 void load_gdt(void);

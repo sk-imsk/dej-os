@@ -22,18 +22,6 @@
      uint64_t bar[6];
  };
 
- struct pci_driver {
-     uint16_t vendor_id;     // 0xffff = any
-     uint16_t device_id;     // 0xffff = any
-
-     uint8_t class;
-     uint8_t subclass;
-     uint8_t prog_if;
-
-     char name[10];
-
-     void (*probe)(struct pci_device *dev);
- };
 
 
  #define mmio_read32(addr)       (*(volatile uint32_t *)(addr))

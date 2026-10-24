@@ -18,11 +18,6 @@ void set_up_framebuffer(void){
 
 extern _Atomic uint64_t temperature;
 
-void test_probe(struct pci_device * dih __unused){
-	LogStr("kernel", "driver loaded");
-}
-
-
 _Noreturn void kmain(void){
 
 	set_up_framebuffer();
