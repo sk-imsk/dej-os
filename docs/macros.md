@@ -1,4 +1,4 @@
-## USE TUFF MACROS
+# USE TUFF MACROS
 
 
 use __dih for not used much functions and __goon for used lots functions this ensures top speed,
