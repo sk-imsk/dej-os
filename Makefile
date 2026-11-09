@@ -55,7 +55,6 @@ $(IMAGE): kernel $(ROOT_DIR)/limine.conf
 	sudo cp $(KERNEL) $(MNT)/boot/kernel.elf
 	sudo cp limine.conf $(MNT)/limine.conf
 	sudo cp $(LIMINE_DIR)/bin/limine-bios.sys $(MNT)/boot/limine/limine-bios.sys
-	sudo cp test.txt $(MNT)/test.txt
 	sudo cp src/programs/out.bin $(MNT)/dih.bin
 
 
