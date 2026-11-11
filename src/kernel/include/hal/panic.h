@@ -1,6 +1,5 @@
-#include <stdint.h>
+#include <dej/kernel.h>
 
 
-#define LIMINE_REQUEST_FAILED 1
 
-_Noreturn void Hapanic(const char * s, uint8_t code);
+_Noreturn void HaQuit(const char * s, uint16_t code, bool early);

@@ -1,10 +1,12 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdatomic.h>
+#include <dej/kernel.h>
 #include <limine.h>
 #include <dej/cpu.h>
 #include <hal/recover.h>
+#include <hal/panic.h>
+#include <dej/log.h>
+
+static const char mod[] = "boot";
+
 #define limine_request __attribute__((used, section(".limine_requests")))
 
 limine_request
@@ -50,7 +52,7 @@ void kentry(void) {
 	check_limine_good();
 
 
+	early_strlog(mod, "Kernel entered");
 
-
-    cpu_stop(); // yo dont forget
+    	cpu_stop(); // yo dont forget
 }
