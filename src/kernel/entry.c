@@ -4,6 +4,7 @@
 #include <hal/recover.h>
 #include <hal/panic.h>
 #include <dej/log.h>
+#include <stdatomic.h>
 
 static const char mod[] = "boot";
 
@@ -44,15 +45,14 @@ void check_limine_good(void){
 
 
 void kentry(void) {
-	if (atomic_load(&kernel_entered) == true){
+	if (atomic_exchange_explicit(&kernel_entered, true, memory_order_acquire) == true){
 		HaRecover(ENTRY_TWICE);
 	}
-	atomic_store(&kernel_entered, true);
 
 	check_limine_good();
 
 
 	early_strlog(mod, "Kernel entered");
 
-    	cpu_stop(); // yo dont forget
+    cpu_stop(); // yo dont forget
 }
