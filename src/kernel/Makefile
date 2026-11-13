@@ -45,8 +45,8 @@ all: kernel
 kernel: $(KERNEL)
 
 
-$(KERNEL): always $(C_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/linker.ld
-	$(LD) -T $(KERNEL_DIR)/linker.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS)
+$(KERNEL): always $(C_OBJECTS) $(S_OBJECTS) $(KERNEL_DIR)/scripts/linker_x86.ld
+	$(LD) -T $(KERNEL_DIR)/scripts/linker_x86.ld -o $@ $(C_OBJECTS) $(ASM_OBJECTS) $(S_OBJECTS)
 
 
 
