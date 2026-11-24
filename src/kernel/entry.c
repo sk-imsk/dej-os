@@ -31,7 +31,7 @@ __attribute__((used, section(".limine_requests_end")))
 static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
 
-static atomic_bool kernel_entered = false;
+static atomic_flag kernel_entered = {};
 
 void check_limine_good(void){
 	if (!fb_rq.response){
@@ -44,15 +44,16 @@ void check_limine_good(void){
 
 
 void kentry(void) {
-	if (atomic_load(&kernel_entered) == true){
+	if (atomic_flag_test_and_set_explicit(&kernel_entered, memory_order_seq_cst)){
 		HaRecover(ENTRY_TWICE);
 	}
-	atomic_store(&kernel_entered, true);
 
 	check_limine_good();
 
 
 	early_strlog(mod, "Kernel entered");
+	early_strlog(mod, "I will not fail");
+	early_fstrlog( mod, "Hello It is %s  at %i %i %u also %x", "dih",  1, 2, 3, 0xabcd);
 
     	cpu_stop(); // yo dont forget
 }
