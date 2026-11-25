@@ -42,8 +42,10 @@ void check_limine_good(void){
 	}
 }
 
+extern void kmain(void);
 
 void kentry(void) {
+	cpu_stop_interrupts();
 	if (atomic_flag_test_and_set_explicit(&kernel_entered, memory_order_seq_cst)){
 		HaRecover(ENTRY_TWICE);
 	}
@@ -53,7 +55,16 @@ void kentry(void) {
 
 	early_strlog(mod, "Kernel entered");
 	early_strlog(mod, "I will not fail");
-	early_fstrlog( mod, "Hello It is %s  at %i %i %u also %x", "dih",  1, 2, 3, 0xabcd);
+	early_fstrlog(mod, "Hello It is %s  at %i %i %u also %x", "dih",  1, 2, 3, 0xabcd);
 
-    	cpu_stop(); // yo dont forget
+
+	cpu_enable_interrupts();
+
+
+	kmain();
+}
+
+
+[[noreturn]] void kmain(void){
+	cpu_stop();
 }
